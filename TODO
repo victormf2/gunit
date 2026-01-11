@@ -4,8 +4,10 @@
     [x] Immutability
     [x] RegexMatcher
     [x] change Containing to Matching
-    [ ] add ContainingAll
-    [ ] review tests
+    [x] add ContainingAll
+    [ ] struct or general matcher
+    [ ] change AnyMap Containing to receive a map[any]any
+    [ ] review tests and public interface
   [ ] add matchers to ToHaveBeenCalled
   [ ] add WhenCalledWith
 [ ] add temporary mock implementations (once, times, etc)
@@ -21,3 +23,4 @@
     [ ] is sorted
     [ ] equals ignore order (array containing)
 [ ] Fix messages
+[ ] Docs

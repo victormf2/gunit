@@ -6,57 +6,70 @@ import (
 )
 
 type AnySliceMatcher struct {
-	MinLength       *int
-	MaxLength       *int
-	ElementMatchers []Matcher
+	minLength       *int
+	maxLength       *int
+	elementMatchers []Matcher
+	matchAll        bool
 }
 
 func (a *AnySliceMatcher) clone() *AnySliceMatcher {
 	newMatcher := &AnySliceMatcher{
-		MinLength:       a.MinLength,
-		MaxLength:       a.MaxLength,
-		ElementMatchers: make([]Matcher, len(a.ElementMatchers)),
+		minLength:       a.minLength,
+		maxLength:       a.maxLength,
+		elementMatchers: make([]Matcher, len(a.elementMatchers)),
+		matchAll:        a.matchAll,
 	}
-	copy(newMatcher.ElementMatchers, a.ElementMatchers)
+	copy(newMatcher.elementMatchers, a.elementMatchers)
 	return newMatcher
 }
 
 func (a *AnySliceMatcher) WithLength(length int) *AnySliceMatcher {
 	newMatcher := a.clone()
-	newMatcher.MinLength = &length
-	newMatcher.MaxLength = &length
+	newMatcher.minLength = &length
+	newMatcher.maxLength = &length
 	return newMatcher
 }
 
 func (a *AnySliceMatcher) WithMaxLength(max int) *AnySliceMatcher {
 	newMatcher := a.clone()
-	newMatcher.MaxLength = &max
+	newMatcher.maxLength = &max
 	return newMatcher
 }
 
 func (a *AnySliceMatcher) WithMinLength(min int) *AnySliceMatcher {
 	newMatcher := a.clone()
-	newMatcher.MinLength = &min
+	newMatcher.minLength = &min
 	return newMatcher
 }
 
 func (a *AnySliceMatcher) WithLengthBetween(min int, max int) *AnySliceMatcher {
 	newMatcher := a.clone()
-	newMatcher.MinLength = &min
-	newMatcher.MaxLength = &max
+	newMatcher.minLength = &min
+	newMatcher.maxLength = &max
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) Containing(items ...any) *AnySliceMatcher {
-	for _, item := range items {
-		matcher, ok := item.(Matcher)
-		if ok {
-			a.ElementMatchers = append(a.ElementMatchers, matcher)
-			continue
-		}
-		a.ElementMatchers = append(a.ElementMatchers, &EqualMatcher{Expected: item})
+func (a *AnySliceMatcher) Containing(values ...any) *AnySliceMatcher {
+	newMatcher := a.containing(false, values)
+	return newMatcher
+}
+
+func (a *AnySliceMatcher) ContainingAll(values ...any) *AnySliceMatcher {
+	newMatcher := a.containing(true, values)
+	return newMatcher
+}
+
+func (a *AnySliceMatcher) containing(matchAll bool, values []any) *AnySliceMatcher {
+	elementMatchers := []Matcher{}
+	for _, value := range values {
+		matcher := getSliceValueMatcher(value)
+		elementMatchers = append(elementMatchers, matcher)
 	}
-	return a
+
+	newMatcher := a.clone()
+	newMatcher.elementMatchers = elementMatchers
+	newMatcher.matchAll = matchAll
+	return newMatcher
 }
 
 func (a *AnySliceMatcher) Match(value any) MatchResult {
@@ -68,34 +81,62 @@ func (a *AnySliceMatcher) Match(value any) MatchResult {
 		}
 	}
 
-	if a.MinLength != nil && sliceValue.Len() < *a.MinLength {
+	if a.minLength != nil && sliceValue.Len() < *a.minLength {
 		return MatchResult{
 			Matches: false,
-			Message: fmt.Sprintf("Expected slice length >= %d, but got %d", *a.MinLength, sliceValue.Len()),
+			Message: fmt.Sprintf("Expected slice length >= %d, but got %d", *a.minLength, sliceValue.Len()),
 		}
 	}
-	if a.MaxLength != nil && sliceValue.Len() > *a.MaxLength {
+	if a.maxLength != nil && sliceValue.Len() > *a.maxLength {
 		return MatchResult{
 			Matches: false,
-			Message: fmt.Sprintf("Expected slice length <= %d, but got %d", *a.MaxLength, sliceValue.Len()),
+			Message: fmt.Sprintf("Expected slice length <= %d, but got %d", *a.maxLength, sliceValue.Len()),
 		}
 	}
-	for _, matcher := range a.ElementMatchers {
-		matched := false
-		for i := range sliceValue.Len() {
-			element := sliceValue.Index(i).Interface()
-			matchResult := matcher.Match(element)
-			if matchResult.Matches {
-				matched = true
+	foundMatch := false
+	for _, elementMatcher := range a.elementMatchers {
+		matched := matchElementInSlice(sliceValue, elementMatcher)
+		if matched {
+			foundMatch = true
+			if !a.matchAll {
 				break
 			}
+			continue
 		}
-		if !matched {
+		if a.matchAll {
 			return MatchResult{
 				Matches: false,
-				Message: fmt.Sprintf("No elements matched for matcher: %+v", matcher),
+				Message: fmt.Sprintf("No element matched for matcher: %+v", elementMatcher),
 			}
+		}
+	}
+	if !foundMatch && len(a.elementMatchers) > 0 {
+		return MatchResult{
+			Matches: false,
+			Message: fmt.Sprintf("None of the element matchers matched the slice"),
 		}
 	}
 	return MatchResult{Matches: true}
+}
+
+func getSliceValueMatcher(value any) Matcher {
+	switch v := value.(type) {
+	case Matcher:
+		return v
+	default:
+		return &EqualMatcher{Expected: v}
+	}
+}
+
+func matchElementInSlice(sliceValue reflect.Value, elementMatcher Matcher) bool {
+	matched := false
+	for i := range sliceValue.Len() {
+		element := sliceValue.Index(i).Interface()
+		matchResult := elementMatcher.Match(element)
+		if matchResult.Matches {
+			matched = true
+			break
+		}
+	}
+	return matched
 }

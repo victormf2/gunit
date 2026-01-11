@@ -35,8 +35,7 @@ func TestAnySlice(t *testing.T) {
 	}
 
 	t.Run("WithLength", func(t *testing.T) {
-		matcher := &AnySliceMatcher{}
-		matcher.WithLength(3)
+		matcher := (&AnySliceMatcher{}).WithLength(3)
 		result := matcher.Match([]int{1, 2, 3})
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -53,8 +52,7 @@ func TestAnySlice(t *testing.T) {
 	})
 
 	t.Run("WithMinLength", func(t *testing.T) {
-		matcher := &AnySliceMatcher{}
-		matcher.WithMinLength(2)
+		matcher := (&AnySliceMatcher{}).WithMinLength(2)
 		result := matcher.Match([]int{1, 2, 3})
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -70,8 +68,7 @@ func TestAnySlice(t *testing.T) {
 	})
 
 	t.Run("WithMaxLength", func(t *testing.T) {
-		matcher := &AnySliceMatcher{}
-		matcher.WithMaxLength(2)
+		matcher := (&AnySliceMatcher{}).WithMaxLength(2)
 		result := matcher.Match([]int{1})
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -87,8 +84,7 @@ func TestAnySlice(t *testing.T) {
 	})
 
 	t.Run("WithLengthBetween", func(t *testing.T) {
-		matcher := &AnySliceMatcher{}
-		matcher.WithLengthBetween(2, 4)
+		matcher := (&AnySliceMatcher{}).WithLengthBetween(2, 4)
 		result := matcher.Match([]int{1})
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
@@ -112,8 +108,33 @@ func TestAnySlice(t *testing.T) {
 	})
 
 	t.Run("Containing", func(t *testing.T) {
-		matcher := &AnySliceMatcher{}
-		matcher.Containing(&AnyStringMatcher{}, 42)
+		matcher := (&AnySliceMatcher{}).Containing(
+			&AnyStringMatcher{},
+			42,
+		)
+		result := matcher.Match([]any{"hello", 42, 3.14})
+		if !result.Matches {
+			t.Errorf("Expected matches to be true, but got false")
+		}
+		result = matcher.Match([]any{"hello"})
+		if !result.Matches {
+			t.Errorf("Expected matches to be true, but got false")
+		}
+		result = matcher.Match([]any{42})
+		if !result.Matches {
+			t.Errorf("Expected matches to be true, but got false")
+		}
+		result = matcher.Match([]any{3.14})
+		if result.Matches {
+			t.Errorf("Expected matches to be false, but got true")
+		}
+	})
+
+	t.Run("ContainingAll", func(t *testing.T) {
+		matcher := (&AnySliceMatcher{}).ContainingAll(
+			&AnyStringMatcher{},
+			42,
+		)
 		result := matcher.Match([]any{"hello", 42, 3.14})
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
