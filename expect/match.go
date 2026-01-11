@@ -5,12 +5,11 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/victormf2/gunit/expect/matchers"
 )
 
-type MatchResult struct {
-	Matches bool
-	Message string
-}
+type MatchResult = matchers.MatchResult
 
 func (e *Expector) ToMatch(t *testing.T, expected any) {
 	actual := e.value
