@@ -7,32 +7,46 @@ type AnyIntMatcher struct {
 	Max *int
 }
 
+func (a *AnyIntMatcher) clone() *AnyIntMatcher {
+	newMatcher := &AnyIntMatcher{
+		Min: a.Min,
+		Max: a.Max,
+	}
+	return newMatcher
+}
+
 func (a *AnyIntMatcher) LessThan(value int) *AnyIntMatcher {
-	*a.Max = value - 1
-	return a
+	newMatcher := a.clone()
+	max := value - 1
+	newMatcher.Max = &max
+	return newMatcher
 }
 
 func (a *AnyIntMatcher) LessThanOrEqualTo(value int) *AnyIntMatcher {
-	*a.Max = value
-	return a
+	newMatcher := a.clone()
+	newMatcher.Max = &value
+	return newMatcher
 }
 
 func (a *AnyIntMatcher) GreaterThan(value int) *AnyIntMatcher {
-	*a.Min = value + 1
-	return a
+	newMatcher := a.clone()
+	min := value + 1
+	newMatcher.Min = &min
+	return newMatcher
 }
 
 func (a *AnyIntMatcher) GreaterThanOrEqualTo(value int) *AnyIntMatcher {
-	*a.Min = value
-	return a
+	newMatcher := a.clone()
+	newMatcher.Min = &value
+	return newMatcher
 }
 
 func (a *AnyIntMatcher) Match(value any) MatchResult {
-	intValue, ok := value.(int)
+	intValue, ok := getInt(value)
 	if !ok {
 		return MatchResult{
 			Matches: false,
-			Message: fmt.Sprintf("Expected type int, but got %T", value),
+			Message: fmt.Sprintf("Expected type int, int8, int16, int32 or int64, but got %T", value),
 		}
 	}
 
@@ -51,4 +65,21 @@ func (a *AnyIntMatcher) Match(value any) MatchResult {
 	}
 
 	return MatchResult{Matches: true}
+}
+
+func getInt(value any) (int, bool) {
+	switch v := value.(type) {
+	case int:
+		return v, true
+	case int8:
+		return int(v), true
+	case int16:
+		return int(v), true
+	case int32:
+		return int(v), true
+	case int64:
+		return int(v), true
+	default:
+		return 0, false
+	}
 }

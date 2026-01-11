@@ -9,43 +9,56 @@ type AnyFloatMatcher struct {
 	Tolerance    *float64
 }
 
+func (a *AnyFloatMatcher) clone() *AnyFloatMatcher {
+	newMatcher := &AnyFloatMatcher{
+		Min:          a.Min,
+		Max:          a.Max,
+		CloseToValue: a.CloseToValue,
+		Tolerance:    a.Tolerance,
+	}
+	return newMatcher
+}
+
 func (a *AnyFloatMatcher) LessThan(value float64) *AnyFloatMatcher {
-	*a.Max = value - 1
-	return a
+	newMatcher := a.clone()
+	max := value - 1
+	newMatcher.Max = &max
+	return newMatcher
 }
 
 func (a *AnyFloatMatcher) LessThanOrEqualTo(value float64) *AnyFloatMatcher {
-	*a.Max = value
-	return a
+	newMatcher := a.clone()
+	newMatcher.Max = new(float64)
+	*newMatcher.Max = value
+	return newMatcher
 }
 
 func (a *AnyFloatMatcher) GreaterThan(value float64) *AnyFloatMatcher {
-	*a.Min = value + 1
-	return a
+	newMatcher := a.clone()
+	min := value + 1
+	newMatcher.Min = &min
+	return newMatcher
 }
 
 func (a *AnyFloatMatcher) GreaterThanOrEqualTo(value float64) *AnyFloatMatcher {
-	*a.Min = value
-	return a
+	newMatcher := a.clone()
+	newMatcher.Min = &value
+	return newMatcher
 }
 
 func (a *AnyFloatMatcher) CloseTo(value float64, tolerance float64) *AnyFloatMatcher {
-	*a.CloseToValue = value
-	*a.Tolerance = tolerance
-	return a
+	newMatcher := a.clone()
+	newMatcher.CloseToValue = &value
+	newMatcher.Tolerance = &tolerance
+	return newMatcher
 }
 
 func (a *AnyFloatMatcher) Match(value any) MatchResult {
-	floatValue, ok := value.(float64)
+	floatValue, ok := getFloat(value)
 	if !ok {
-		floatValue32, ok := value.(float32)
-		if ok {
-			floatValue = float64(floatValue32)
-		} else {
-			return MatchResult{
-				Matches: false,
-				Message: fmt.Sprintf("Expected type float64, but got %T", value),
-			}
+		return MatchResult{
+			Matches: false,
+			Message: fmt.Sprintf("Expected type float32 or float64, but got %T", value),
 		}
 	}
 	if a.CloseToValue != nil && a.Tolerance != nil {
@@ -71,4 +84,15 @@ func (a *AnyFloatMatcher) Match(value any) MatchResult {
 		}
 	}
 	return MatchResult{Matches: true}
+}
+
+func getFloat(value any) (float64, bool) {
+	switch v := value.(type) {
+	case float32:
+		return float64(v), true
+	case float64:
+		return v, true
+	default:
+		return 0, false
+	}
 }

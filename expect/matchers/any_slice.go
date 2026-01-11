@@ -11,26 +11,40 @@ type AnySliceMatcher struct {
 	ElementMatchers []Matcher
 }
 
+func (a *AnySliceMatcher) clone() *AnySliceMatcher {
+	newMatcher := &AnySliceMatcher{
+		MinLength:       a.MinLength,
+		MaxLength:       a.MaxLength,
+		ElementMatchers: make([]Matcher, len(a.ElementMatchers)),
+	}
+	copy(newMatcher.ElementMatchers, a.ElementMatchers)
+	return newMatcher
+}
+
 func (a *AnySliceMatcher) WithLength(length int) *AnySliceMatcher {
-	*a.MinLength = length
-	*a.MaxLength = length
-	return a
+	newMatcher := a.clone()
+	newMatcher.MinLength = &length
+	newMatcher.MaxLength = &length
+	return newMatcher
 }
 
 func (a *AnySliceMatcher) WithMaxLength(max int) *AnySliceMatcher {
-	*a.MaxLength = max
-	return a
+	newMatcher := a.clone()
+	newMatcher.MaxLength = &max
+	return newMatcher
 }
 
 func (a *AnySliceMatcher) WithMinLength(min int) *AnySliceMatcher {
-	*a.MinLength = min
-	return a
+	newMatcher := a.clone()
+	newMatcher.MinLength = &min
+	return newMatcher
 }
 
 func (a *AnySliceMatcher) WithLengthBetween(min int, max int) *AnySliceMatcher {
-	*a.MinLength = min
-	*a.MaxLength = max
-	return a
+	newMatcher := a.clone()
+	newMatcher.MinLength = &min
+	newMatcher.MaxLength = &max
+	return newMatcher
 }
 
 func (a *AnySliceMatcher) Containing(items ...any) *AnySliceMatcher {
@@ -40,7 +54,7 @@ func (a *AnySliceMatcher) Containing(items ...any) *AnySliceMatcher {
 			a.ElementMatchers = append(a.ElementMatchers, matcher)
 			continue
 		}
-		a.ElementMatchers = append(a.ElementMatchers, &EqualMatcher{expected: item})
+		a.ElementMatchers = append(a.ElementMatchers, &EqualMatcher{Expected: item})
 	}
 	return a
 }

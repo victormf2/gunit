@@ -2,40 +2,69 @@ package matchers
 
 import (
 	"fmt"
-	"strings"
 )
 
 type AnyStringMatcher struct {
-	MinLength  *int
-	MaxLength  *int
-	Substrings []string
+	MinLength         *int
+	MaxLength         *int
+	SubstringMatchers []Matcher
+	MatchAll          bool
+}
+
+func (a *AnyStringMatcher) clone() *AnyStringMatcher {
+	newMatcher := &AnyStringMatcher{
+		MinLength:         a.MinLength,
+		MaxLength:         a.MaxLength,
+		SubstringMatchers: make([]Matcher, len(a.SubstringMatchers)),
+		MatchAll:          a.MatchAll,
+	}
+	copy(newMatcher.SubstringMatchers, a.SubstringMatchers)
+	return newMatcher
 }
 
 func (a *AnyStringMatcher) WithLength(length int) *AnyStringMatcher {
-	*a.MinLength = length
-	*a.MaxLength = length
-	return a
+	newMatcher := a.clone()
+	newMatcher.MinLength = &length
+	newMatcher.MaxLength = &length
+	return newMatcher
 }
 
 func (a *AnyStringMatcher) WithMaxLength(max int) *AnyStringMatcher {
-	*a.MaxLength = max
-	return a
+	newMatcher := a.clone()
+	newMatcher.MaxLength = &max
+	return newMatcher
 }
 
 func (a *AnyStringMatcher) WithMinLength(min int) *AnyStringMatcher {
-	*a.MinLength = min
-	return a
+	newMatcher := a.clone()
+	newMatcher.MinLength = &min
+	return newMatcher
 }
 
 func (a *AnyStringMatcher) WithLengthBetween(min int, max int) *AnyStringMatcher {
-	*a.MinLength = min
-	*a.MaxLength = max
-	return a
+	newMatcher := a.clone()
+	newMatcher.MinLength = &min
+	newMatcher.MaxLength = &max
+	return newMatcher
 }
 
-func (a *AnyStringMatcher) Containing(substrings ...string) *AnyStringMatcher {
-	a.Substrings = substrings
-	return a
+func (a *AnyStringMatcher) ContainingAll(values ...any) *AnyStringMatcher {
+	newMatcher := a.clone()
+	substringMatchers := []Matcher{}
+	for _, value := range values {
+		matcher, ok := value.(Matcher)
+		if !ok {
+			substring, ok := value.(string)
+			if !ok {
+				panic("ContainingAll only accepts strings or Matcher instances")
+			}
+			matcher = &SubstringMatcher{Substring: substring}
+		}
+		substringMatchers = append(substringMatchers, matcher)
+	}
+	newMatcher.SubstringMatchers = substringMatchers
+	newMatcher.MatchAll = true
+	return newMatcher
 }
 
 func (a *AnyStringMatcher) Match(value any) MatchResult {
@@ -58,12 +87,24 @@ func (a *AnyStringMatcher) Match(value any) MatchResult {
 			Message: fmt.Sprintf("Expected string length <= %d, but got %d", *a.MaxLength, len(strValue)),
 		}
 	}
-	for _, substring := range a.Substrings {
-		if !strings.Contains(strValue, substring) {
+	foundMatch := false
+	for _, substringMatcher := range a.SubstringMatchers {
+		matchResult := substringMatcher.Match(strValue)
+		if matchResult.Matches {
+			foundMatch = true
+			continue
+		}
+		if a.MatchAll {
 			return MatchResult{
 				Matches: false,
-				Message: fmt.Sprintf("Expected string to contain '%s', but it did not", substring),
+				Message: matchResult.Message,
 			}
+		}
+	}
+	if !foundMatch && len(a.SubstringMatchers) > 0 {
+		return MatchResult{
+			Matches: false,
+			Message: fmt.Sprintf("None of the substring matchers matched the string"),
 		}
 	}
 	return MatchResult{Matches: true}

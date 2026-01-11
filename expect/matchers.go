@@ -41,3 +41,7 @@ func AnySlice() Matcher {
 func AnyMap() Matcher {
 	return &matchers.AnyMapMatcher{}
 }
+
+func Equal(expected any) Matcher {
+	return &matchers.EqualMatcher{Expected: expected}
+}
