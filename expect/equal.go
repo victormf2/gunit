@@ -1,13 +1,15 @@
 package expect
 
 import (
+	"reflect"
 	"testing"
 )
 
 func (e *Expector) ToEqual(t *testing.T, expected any) {
 	actual := e.value
 
-	if actual != expected {
-		t.Fatalf("Expected %v, got %v", expected, actual)
+	matchResult := matchEquals(reflect.ValueOf(actual), reflect.ValueOf(expected))
+	if !matchResult.Matches {
+		t.Fatal(matchResult.Message)
 	}
 }

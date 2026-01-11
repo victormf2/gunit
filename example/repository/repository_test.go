@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/victormf2/testo/example/domain"
-	"github.com/victormf2/testo/expect"
-	"github.com/victormf2/testo/mock"
+	"github.com/victormf2/gunit/example/domain"
+	"github.com/victormf2/gunit/expect"
+	"github.com/victormf2/gunit/mock"
 )
 
 func TestTestinho(t *testing.T) {

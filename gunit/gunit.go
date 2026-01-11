@@ -1,4 +1,4 @@
-package testo
+package gunit
 
 func As[T any](value any) T {
 	if value == nil {

@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/victormf2/testo/example/domain"
-	"github.com/victormf2/testo/mock"
-	"github.com/victormf2/testo/testo"
+	"github.com/victormf2/gunit/example/domain"
+	"github.com/victormf2/gunit/gunit"
+	"github.com/victormf2/gunit/mock"
 )
 
 type MockRepository struct {
@@ -16,18 +16,18 @@ type MockRepository struct {
 
 func (m *MockRepository) GetUser(ctx context.Context, userId string) (*domain.User, error) {
 	returns := m.MockGetUser.Call(ctx, userId)
-	return testo.As[*domain.User](returns[0]),
-		testo.As[error](returns[1])
+	return gunit.As[*domain.User](returns[0]),
+		gunit.As[error](returns[1])
 }
 
 func (m *MockRepository) SaveUser(ctx context.Context, user *domain.User) error {
 	returns := m.MockGetUser.Call(ctx, user)
-	return testo.As[error](returns[0])
+	return gunit.As[error](returns[0])
 }
 
 func (m *MockRepository) SomethingReturnsInt() int {
 	returns := m.MockSomethingReturnsInt.Call()
-	return testo.As[int](returns[0])
+	return gunit.As[int](returns[0])
 }
 
 func NewMockRepository() *MockRepository {

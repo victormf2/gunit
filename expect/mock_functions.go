@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/victormf2/testo/mock"
+	"github.com/victormf2/gunit/mock"
 )
 
 func (e *Expector) ToHaveBeenCalled(t *testing.T, opts ...CallMatchOption) {

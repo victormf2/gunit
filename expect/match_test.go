@@ -1,10 +1,10 @@
-package match
+package expect_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/victormf2/testo/expect"
+	"github.com/victormf2/gunit/expect"
 )
 
 type BigStruct struct {
