@@ -2,10 +2,10 @@
 [ ] matchers by value
   [ ] implement matchers
     [x] Immutability
-    [ ] RegexMatcher
-    [ ] change Containing to Matching
+    [x] RegexMatcher
+    [x] change Containing to Matching
     [ ] add ContainingAll
-    [ ] tests
+    [ ] review tests
   [ ] add matchers to ToHaveBeenCalled
   [ ] add WhenCalledWith
 [ ] add temporary mock implementations (once, times, etc)

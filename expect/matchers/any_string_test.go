@@ -1,6 +1,9 @@
 package matchers
 
-import "testing"
+import (
+	"regexp"
+	"testing"
+)
 
 func Test(t *testing.T) {
 	testCases := []struct {
@@ -27,11 +30,11 @@ func Test(t *testing.T) {
 				t.Errorf("Expected matches to be %v, but got %v", tC.matches, result.Matches)
 			}
 		})
+
 	}
 
 	t.Run("WithLength", func(t *testing.T) {
-		matcher := &AnyStringMatcher{}
-		matcher.WithLength(5)
+		matcher := (&AnyStringMatcher{}).WithLength(5)
 		result := matcher.Match("hello")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -47,8 +50,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("WithMaxLength", func(t *testing.T) {
-		matcher := &AnyStringMatcher{}
-		matcher.WithMaxLength(5)
+		matcher := (&AnyStringMatcher{}).WithMaxLength(5)
 		result := matcher.Match("hi")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -64,8 +66,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("WithMinLength", func(t *testing.T) {
-		matcher := &AnyStringMatcher{}
-		matcher.WithMinLength(3)
+		matcher := (&AnyStringMatcher{}).WithMinLength(3)
 		result := matcher.Match("hi")
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
@@ -81,8 +82,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("WithLengthBetween", func(t *testing.T) {
-		matcher := &AnyStringMatcher{}
-		matcher.WithLengthBetween(3, 5)
+		matcher := (&AnyStringMatcher{}).WithLengthBetween(3, 5)
 		result := matcher.Match("hi")
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
@@ -105,10 +105,25 @@ func Test(t *testing.T) {
 		}
 	})
 
-	t.Run("Containing", func(t *testing.T) {
-		matcher := &AnyStringMatcher{}
-		matcher.ContainingAll("foo", "bar")
-		result := matcher.Match("foobar")
+	t.Run("Matching", func(t *testing.T) {
+		matcher := (&AnyStringMatcher{}).Matching("foo", regexp.MustCompile("ba[^z]"))
+		result := matcher.Match("foo")
+		if !result.Matches {
+			t.Errorf("Expected matches to be true, but got false")
+		}
+		result = matcher.Match("bar")
+		if !result.Matches {
+			t.Errorf("Expected matches to be true, but got false")
+		}
+		result = matcher.Match("baz")
+		if result.Matches {
+			t.Errorf("Expected matches to be false, but got true")
+		}
+	})
+
+	t.Run("MatchingAll", func(t *testing.T) {
+		matcher := (&AnyStringMatcher{}).MatchingAll("foo", regexp.MustCompile("ba[^z]"))
+		result := matcher.Match("foobarbaz")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
@@ -117,10 +132,6 @@ func Test(t *testing.T) {
 			t.Errorf("Expected matches to be false, but got true")
 		}
 		result = matcher.Match("bar")
-		if result.Matches {
-			t.Errorf("Expected matches to be false, but got true")
-		}
-		result = matcher.Match("baz")
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
