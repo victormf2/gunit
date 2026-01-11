@@ -1,0 +1,12 @@
+[x] panic
+[ ] matcher by value
+[ ] lengths
+[ ] contains
+[ ] gt, gte, etc
+[ ] type assertions
+[ ] nil, nan
+[ ] errors
+[ ] slices
+  [ ] is sorted
+  [ ] equals ignore order (array containing)
+[ ] Fix error messages

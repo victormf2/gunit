@@ -3,6 +3,7 @@ package expect
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -81,8 +82,10 @@ func matchStructs(actualStruct, expectedStruct reflect.Value) MatchResult {
 
 		expectedFieldValue := expectedStruct.Field(i)
 
+		gunitTag := expectedField.Tag.Get("gunit")
+
 		// Skip zero values in expected
-		if expectedFieldValue.IsZero() {
+		if expectedFieldValue.IsZero() && !strings.Contains(gunitTag, "required") {
 			continue
 		}
 

@@ -8,7 +8,7 @@ import (
 )
 
 type BigStruct struct {
-	String      string
+	String      string `gunit:"required"`
 	Number      int
 	Bool        bool
 	Date        time.Time
@@ -142,6 +142,14 @@ func TestMatch(t *testing.T) {
 			Struct: NestedStruct{ID: 99},
 		}
 
+		expect.It(actual).ToMatch(t, expected)
+	})
+
+	t.Run("required tag", func(t *testing.T) {
+		actual := BigStruct{}
+		expected := &BigStruct{
+			String: "must be set",
+		}
 		expect.It(actual).ToMatch(t, expected)
 	})
 }
