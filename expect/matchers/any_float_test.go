@@ -35,8 +35,7 @@ func TestAnyFloatMatcher(t *testing.T) {
 	}
 
 	t.Run("LessThan", func(t *testing.T) {
-		matcher := &AnyFloatMatcher{}
-		matcher.LessThan(10.0)
+		matcher := (&AnyFloatMatcher{}).LessThan(10.0)
 		result := matcher.Match(9.0)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -48,8 +47,7 @@ func TestAnyFloatMatcher(t *testing.T) {
 	})
 
 	t.Run("LessThanOrEqualTo", func(t *testing.T) {
-		matcher := &AnyFloatMatcher{}
-		matcher.LessThanOrEqualTo(10.0)
+		matcher := (&AnyFloatMatcher{}).LessThanOrEqualTo(10.0)
 		result := matcher.Match(9.0)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -65,8 +63,7 @@ func TestAnyFloatMatcher(t *testing.T) {
 	})
 
 	t.Run("GreaterThan", func(t *testing.T) {
-		matcher := &AnyFloatMatcher{}
-		matcher.GreaterThan(5.0)
+		matcher := (&AnyFloatMatcher{}).GreaterThan(5.0)
 		result := matcher.Match(6.0)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -78,8 +75,7 @@ func TestAnyFloatMatcher(t *testing.T) {
 	})
 
 	t.Run("GreaterThanOrEqualTo", func(t *testing.T) {
-		matcher := &AnyFloatMatcher{}
-		matcher.GreaterThanOrEqualTo(5.0)
+		matcher := (&AnyFloatMatcher{}).GreaterThanOrEqualTo(5.0)
 		result := matcher.Match(6.0)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -95,8 +91,7 @@ func TestAnyFloatMatcher(t *testing.T) {
 	})
 
 	t.Run("CloseTo", func(t *testing.T) {
-		matcher := &AnyFloatMatcher{}
-		matcher.CloseTo(10.0, 0.5)
+		matcher := (&AnyFloatMatcher{}).CloseTo(10.0, 0.5)
 		result := matcher.Match(10.3)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")

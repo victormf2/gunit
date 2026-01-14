@@ -50,8 +50,7 @@ func TestAnyIntMatcher(t *testing.T) {
 	}
 
 	t.Run("LessThan", func(t *testing.T) {
-		matcher := &AnyIntMatcher{}
-		matcher.LessThan(10)
+		matcher := (&AnyIntMatcher{}).LessThan(10)
 		result := matcher.Match(9)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -63,8 +62,7 @@ func TestAnyIntMatcher(t *testing.T) {
 	})
 
 	t.Run("LessThanOrEqualTo", func(t *testing.T) {
-		matcher := &AnyIntMatcher{}
-		matcher.LessThanOrEqualTo(10)
+		matcher := (&AnyIntMatcher{}).LessThanOrEqualTo(10)
 		result := matcher.Match(9)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -80,8 +78,7 @@ func TestAnyIntMatcher(t *testing.T) {
 	})
 
 	t.Run("GreaterThan", func(t *testing.T) {
-		matcher := &AnyIntMatcher{}
-		matcher.GreaterThan(5)
+		matcher := (&AnyIntMatcher{}).GreaterThan(5)
 		result := matcher.Match(6)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -93,8 +90,7 @@ func TestAnyIntMatcher(t *testing.T) {
 	})
 
 	t.Run("GreaterThanOrEqualTo", func(t *testing.T) {
-		matcher := &AnyIntMatcher{}
-		matcher.GreaterThanOrEqualTo(5)
+		matcher := (&AnyIntMatcher{}).GreaterThanOrEqualTo(5)
 		result := matcher.Match(6)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")

@@ -45,3 +45,7 @@ func AnyMap() Matcher {
 func Equal(expected any) Matcher {
 	return &matchers.EqualMatcher{Expected: expected}
 }
+
+func Matching(expected any) Matcher {
+	return (&matchers.GeneralMatcher{}).Matching(expected)
+}

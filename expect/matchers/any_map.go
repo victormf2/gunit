@@ -6,20 +6,22 @@ import (
 )
 
 type AnyMapMatcher struct {
-	minLength        *int
-	maxLength        *int
-	keyValueMatchers []*keyValueMatcher
-	matchAll         bool
+	minLength         *int
+	maxLength         *int
+	matchAll          bool
+	matchNil          bool
+	expectedKeyValues []*keyValueMatcher
 }
 
 func (a *AnyMapMatcher) clone() *AnyMapMatcher {
 	newMatcher := &AnyMapMatcher{
-		minLength:        a.minLength,
-		maxLength:        a.maxLength,
-		keyValueMatchers: make([]*keyValueMatcher, len(a.keyValueMatchers)),
-		matchAll:         a.matchAll,
+		minLength:         a.minLength,
+		maxLength:         a.maxLength,
+		matchAll:          a.matchAll,
+		matchNil:          a.matchNil,
+		expectedKeyValues: make([]*keyValueMatcher, len(a.expectedKeyValues)),
 	}
-	copy(newMatcher.keyValueMatchers, a.keyValueMatchers)
+	copy(newMatcher.expectedKeyValues, a.expectedKeyValues)
 	return newMatcher
 }
 
@@ -28,15 +30,15 @@ type keyValueMatcher struct {
 	valueMatcher Matcher
 }
 
-func (k *keyValueMatcher) match(key any, value any) MatchResult {
-	keyResult := k.keyMatcher.Match(key)
+func (k *keyValueMatcher) match(expectedKey any, expectedValue any) MatchResult {
+	keyResult := k.keyMatcher.Match(expectedKey)
 	if !keyResult.Matches {
 		return MatchResult{
 			Matches: false,
 			Message: fmt.Sprintf("Key did not match: %s", keyResult.Message),
 		}
 	}
-	valueResult := k.valueMatcher.Match(value)
+	valueResult := k.valueMatcher.Match(expectedValue)
 	if !valueResult.Matches {
 		return MatchResult{
 			Matches: false,
@@ -122,6 +124,27 @@ func (a *AnyMapMatcher) ContainingAllValues(values ...any) *AnyMapMatcher {
 	return newMatcher
 }
 
+func (a *AnyMapMatcher) matching(value any) *AnyMapMatcher {
+	if value == nil {
+		newMatcher := a.clone()
+		newMatcher.matchNil = true
+		return newMatcher
+	}
+	mapValue, ok := getMap(value)
+	if !ok {
+		panic("Matching only accepts nil or maps")
+	}
+
+	keys := mapValue.MapKeys()
+	keyValues := [][]any{}
+	for _, key := range keys {
+		value := mapValue.MapIndex(key)
+		keyValues = append(keyValues, []any{key.Interface(), value.Interface()})
+	}
+	newMatcher := a.WithLength(mapValue.Len()).containing(true, keyValues)
+	return newMatcher
+}
+
 func (a *AnyMapMatcher) containing(matchAll bool, keyValues [][]any) *AnyMapMatcher {
 	keyValueMatchers := []*keyValueMatcher{}
 	for _, pair := range keyValues {
@@ -137,19 +160,29 @@ func (a *AnyMapMatcher) containing(matchAll bool, keyValues [][]any) *AnyMapMatc
 	}
 
 	newMatcher := a.clone()
-	newMatcher.keyValueMatchers = keyValueMatchers
+	newMatcher.expectedKeyValues = keyValueMatchers
 	newMatcher.matchAll = matchAll
 	return newMatcher
 }
 
 func (a *AnyMapMatcher) Match(value any) MatchResult {
-	mapValue := reflect.ValueOf(value)
-	if mapValue.Kind() != reflect.Map {
+	if value == nil {
+		if a.matchNil {
+			return MatchResult{Matches: true}
+		}
+		return MatchResult{
+			Matches: false,
+			Message: fmt.Sprintf("Expected type map, but got nil"),
+		}
+	}
+	mapValue, ok := getMap(value)
+	if !ok {
 		return MatchResult{
 			Matches: false,
 			Message: fmt.Sprintf("Expected type map, but got %T", value),
 		}
 	}
+
 	if a.minLength != nil && mapValue.Len() < *a.minLength {
 		return MatchResult{
 			Matches: false,
@@ -162,8 +195,13 @@ func (a *AnyMapMatcher) Match(value any) MatchResult {
 			Message: fmt.Sprintf("Expected map length <= %d, but got %d", *a.maxLength, mapValue.Len()),
 		}
 	}
+
+	if len(a.expectedKeyValues) == 0 {
+		return MatchResult{Matches: true}
+	}
+
 	foundMatch := false
-	for _, kvMatcher := range a.keyValueMatchers {
+	for _, kvMatcher := range a.expectedKeyValues {
 		matched := matchKeyValueInMap(mapValue, kvMatcher)
 		if matched {
 			foundMatch = true
@@ -179,7 +217,7 @@ func (a *AnyMapMatcher) Match(value any) MatchResult {
 			}
 		}
 	}
-	if !foundMatch && len(a.keyValueMatchers) > 0 {
+	if !foundMatch && len(a.expectedKeyValues) > 0 {
 		return MatchResult{
 			Matches: false,
 			Message: fmt.Sprintf("None of the key-value matchers matched the map"),
@@ -188,21 +226,21 @@ func (a *AnyMapMatcher) Match(value any) MatchResult {
 	return MatchResult{Matches: true}
 }
 
-func getMapKeyMatcher(value any) Matcher {
-	switch v := value.(type) {
+func getMapKeyMatcher(expectedKey any) Matcher {
+	switch v := expectedKey.(type) {
 	case Matcher:
 		return v
 	default:
-		return &EqualMatcher{Expected: v}
+		return (&GeneralMatcher{}).Matching(expectedKey)
 	}
 }
 
-func getMapValueMatcher(value any) Matcher {
-	switch v := value.(type) {
+func getMapValueMatcher(expectedValue any) Matcher {
+	switch v := expectedValue.(type) {
 	case Matcher:
 		return v
 	default:
-		return &EqualMatcher{Expected: v}
+		return (&GeneralMatcher{}).Matching(expectedValue)
 	}
 }
 
@@ -219,4 +257,16 @@ func matchKeyValueInMap(mapValue reflect.Value, kvMatcher *keyValueMatcher) bool
 		break
 	}
 	return matched
+}
+
+func getMap(value any) (reflect.Value, bool) {
+	var zeroValue reflect.Value
+	if value == nil {
+		return zeroValue, false
+	}
+	mapValue := reflect.ValueOf(value)
+	if mapValue.Kind() != reflect.Map {
+		return zeroValue, false
+	}
+	return mapValue, true
 }

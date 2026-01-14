@@ -50,8 +50,7 @@ func TestAnyUintMatcher(t *testing.T) {
 	}
 
 	t.Run("LessThan", func(t *testing.T) {
-		matcher := &AnyUintMatcher{}
-		matcher.LessThan(uint(10))
+		matcher := (&AnyUintMatcher{}).LessThan(uint(10))
 		result := matcher.Match(uint(9))
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -63,8 +62,7 @@ func TestAnyUintMatcher(t *testing.T) {
 	})
 
 	t.Run("LessThanOrEqualTo", func(t *testing.T) {
-		matcher := &AnyUintMatcher{}
-		matcher.LessThanOrEqualTo(uint(10))
+		matcher := (&AnyUintMatcher{}).LessThanOrEqualTo(uint(10))
 		result := matcher.Match(uint(9))
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -80,8 +78,7 @@ func TestAnyUintMatcher(t *testing.T) {
 	})
 
 	t.Run("GreaterThan", func(t *testing.T) {
-		matcher := &AnyUintMatcher{}
-		matcher.GreaterThan(uint(5))
+		matcher := (&AnyUintMatcher{}).GreaterThan(uint(5))
 		result := matcher.Match(uint(6))
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -93,8 +90,7 @@ func TestAnyUintMatcher(t *testing.T) {
 	})
 
 	t.Run("GreaterThanOrEqualTo", func(t *testing.T) {
-		matcher := &AnyUintMatcher{}
-		matcher.GreaterThanOrEqualTo(uint(5))
+		matcher := (&AnyUintMatcher{}).GreaterThanOrEqualTo(uint(5))
 		result := matcher.Match(uint(6))
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")

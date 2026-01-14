@@ -1,7 +1,6 @@
 package expect
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/victormf2/gunit/mock"
@@ -52,7 +51,7 @@ func (e *callExpectations) matchingCalls(fn *mock.MockFunction) []mock.Call {
 		matches := true
 		for i, actualArg := range call.Args {
 			expectedArg := e.args[i]
-			matchResult := match(reflect.ValueOf(expectedArg), reflect.ValueOf(actualArg))
+			matchResult := Matching(expectedArg).Match(actualArg)
 			if !matchResult.Matches {
 				matches = false
 			}

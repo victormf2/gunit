@@ -6,20 +6,24 @@ import (
 )
 
 type AnySliceMatcher struct {
-	minLength       *int
-	maxLength       *int
-	elementMatchers []Matcher
-	matchAll        bool
+	minLength        *int
+	maxLength        *int
+	matchNil         bool
+	matchInOrder     bool
+	matchAll         bool
+	expectedElements []Matcher
 }
 
 func (a *AnySliceMatcher) clone() *AnySliceMatcher {
 	newMatcher := &AnySliceMatcher{
-		minLength:       a.minLength,
-		maxLength:       a.maxLength,
-		elementMatchers: make([]Matcher, len(a.elementMatchers)),
-		matchAll:        a.matchAll,
+		minLength:        a.minLength,
+		maxLength:        a.maxLength,
+		matchInOrder:     a.matchInOrder,
+		matchAll:         a.matchAll,
+		matchNil:         a.matchNil,
+		expectedElements: make([]Matcher, len(a.expectedElements)),
 	}
-	copy(newMatcher.elementMatchers, a.elementMatchers)
+	copy(newMatcher.expectedElements, a.expectedElements)
 	return newMatcher
 }
 
@@ -50,31 +54,59 @@ func (a *AnySliceMatcher) WithLengthBetween(min int, max int) *AnySliceMatcher {
 }
 
 func (a *AnySliceMatcher) Containing(values ...any) *AnySliceMatcher {
-	newMatcher := a.containing(false, values)
+	newMatcher := a.containing(false, false, values)
 	return newMatcher
 }
 
 func (a *AnySliceMatcher) ContainingAll(values ...any) *AnySliceMatcher {
-	newMatcher := a.containing(true, values)
+	newMatcher := a.containing(true, false, values)
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) containing(matchAll bool, values []any) *AnySliceMatcher {
+func (a *AnySliceMatcher) matching(value any) *AnySliceMatcher {
+	if value == nil {
+		newMatcher := a.clone()
+		newMatcher.matchNil = true
+		return newMatcher
+	}
+	sliceValue, ok := getSlice(value)
+	if !ok {
+		panic("Matching only accept nil, arrays and alices")
+	}
+	elements := make([]any, sliceValue.Len())
+	for i := range sliceValue.Len() {
+		elements[i] = sliceValue.Index(i).Interface()
+	}
+	newMatcher := a.WithLength(sliceValue.Len()).containing(true, true, elements)
+	return newMatcher
+}
+
+func (a *AnySliceMatcher) containing(matchAll bool, matchInOrder bool, expectedElements []any) *AnySliceMatcher {
 	elementMatchers := []Matcher{}
-	for _, value := range values {
-		matcher := getSliceValueMatcher(value)
+	for _, element := range expectedElements {
+		matcher := getSliceElementMatcher(element)
 		elementMatchers = append(elementMatchers, matcher)
 	}
 
 	newMatcher := a.clone()
-	newMatcher.elementMatchers = elementMatchers
+	newMatcher.expectedElements = elementMatchers
 	newMatcher.matchAll = matchAll
+	newMatcher.matchInOrder = matchInOrder
 	return newMatcher
 }
 
 func (a *AnySliceMatcher) Match(value any) MatchResult {
-	sliceValue := reflect.ValueOf(value)
-	if sliceValue.Kind() != reflect.Slice && sliceValue.Kind() != reflect.Array {
+	if value == nil {
+		if a.matchNil {
+			return MatchResult{Matches: true}
+		}
+		return MatchResult{
+			Matches: false,
+			Message: fmt.Sprintf("Expected type slice or array, but got nil"),
+		}
+	}
+	sliceValue, ok := getSlice(value)
+	if !ok {
 		return MatchResult{
 			Matches: false,
 			Message: fmt.Sprintf("Expected type slice or array, but got %T", value),
@@ -93,42 +125,62 @@ func (a *AnySliceMatcher) Match(value any) MatchResult {
 			Message: fmt.Sprintf("Expected slice length <= %d, but got %d", *a.maxLength, sliceValue.Len()),
 		}
 	}
+
+	if len(a.expectedElements) == 0 {
+		return MatchResult{Matches: true}
+	}
+
 	foundMatch := false
-	for _, elementMatcher := range a.elementMatchers {
-		matched := matchElementInSlice(sliceValue, elementMatcher)
-		if matched {
+	problemsByIndex := map[any]MatchResult{}
+	for elementIndex, elementMatcher := range a.expectedElements {
+		elementMatchResult := a.matchElementInSlice(sliceValue, elementIndex, elementMatcher)
+		if elementMatchResult.Matches {
 			foundMatch = true
 			if !a.matchAll {
 				break
 			}
 			continue
 		}
-		if a.matchAll {
+		problemsByIndex[elementIndex] = elementMatchResult
+	}
+
+	if !a.matchAll {
+		if !foundMatch {
 			return MatchResult{
-				Matches: false,
-				Message: fmt.Sprintf("No element matched for matcher: %+v", elementMatcher),
+				Matches:         false,
+				Message:         "no matches found in slice",
+				ProblemsByField: problemsByIndex,
 			}
 		}
+		return MatchResult{Matches: true}
 	}
-	if !foundMatch && len(a.elementMatchers) > 0 {
+
+	if len(problemsByIndex) > 0 {
 		return MatchResult{
-			Matches: false,
-			Message: fmt.Sprintf("None of the element matchers matched the slice"),
+			Matches:         false,
+			Message:         "some elements did not match",
+			ProblemsByField: problemsByIndex,
 		}
 	}
+
 	return MatchResult{Matches: true}
 }
 
-func getSliceValueMatcher(value any) Matcher {
+func getSliceElementMatcher(value any) Matcher {
 	switch v := value.(type) {
 	case Matcher:
 		return v
 	default:
-		return &EqualMatcher{Expected: v}
+		return (&GeneralMatcher{}).Matching(value)
 	}
 }
 
-func matchElementInSlice(sliceValue reflect.Value, elementMatcher Matcher) bool {
+func (a *AnySliceMatcher) matchElementInSlice(sliceValue reflect.Value, elementIndex int, elementMatcher Matcher) MatchResult {
+	if a.matchInOrder {
+		element := sliceValue.Index(elementIndex)
+		matchResult := elementMatcher.Match(element)
+		return matchResult
+	}
 	matched := false
 	for i := range sliceValue.Len() {
 		element := sliceValue.Index(i).Interface()
@@ -138,5 +190,23 @@ func matchElementInSlice(sliceValue reflect.Value, elementMatcher Matcher) bool 
 			break
 		}
 	}
-	return matched
+	if !matched {
+		return MatchResult{
+			Matches: false,
+			Message: fmt.Sprintf("No element found in slice for matcher %+v", elementMatcher),
+		}
+	}
+	return MatchResult{Matches: true}
+}
+
+func getSlice(value any) (reflect.Value, bool) {
+	var zeroValue reflect.Value
+	if value == nil {
+		return zeroValue, false
+	}
+	sliceValue := reflect.ValueOf(value)
+	if sliceValue.Kind() != reflect.Array && sliceValue.Kind() != reflect.Slice {
+		return zeroValue, false
+	}
+	return sliceValue, true
 }

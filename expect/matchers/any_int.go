@@ -3,14 +3,14 @@ package matchers
 import "fmt"
 
 type AnyIntMatcher struct {
-	Min *int
-	Max *int
+	min *int
+	max *int
 }
 
 func (a *AnyIntMatcher) clone() *AnyIntMatcher {
 	newMatcher := &AnyIntMatcher{
-		Min: a.Min,
-		Max: a.Max,
+		min: a.min,
+		max: a.max,
 	}
 	return newMatcher
 }
@@ -18,49 +18,49 @@ func (a *AnyIntMatcher) clone() *AnyIntMatcher {
 func (a *AnyIntMatcher) LessThan(value int) *AnyIntMatcher {
 	newMatcher := a.clone()
 	max := value - 1
-	newMatcher.Max = &max
+	newMatcher.max = &max
 	return newMatcher
 }
 
 func (a *AnyIntMatcher) LessThanOrEqualTo(value int) *AnyIntMatcher {
 	newMatcher := a.clone()
-	newMatcher.Max = &value
+	newMatcher.max = &value
 	return newMatcher
 }
 
 func (a *AnyIntMatcher) GreaterThan(value int) *AnyIntMatcher {
 	newMatcher := a.clone()
 	min := value + 1
-	newMatcher.Min = &min
+	newMatcher.min = &min
 	return newMatcher
 }
 
 func (a *AnyIntMatcher) GreaterThanOrEqualTo(value int) *AnyIntMatcher {
 	newMatcher := a.clone()
-	newMatcher.Min = &value
+	newMatcher.min = &value
 	return newMatcher
 }
 
-func (a *AnyIntMatcher) Match(value any) MatchResult {
-	intValue, ok := getInt(value)
+func (a *AnyIntMatcher) Match(actualValue any) MatchResult {
+	actualValueInt, ok := getInt(actualValue)
 	if !ok {
 		return MatchResult{
 			Matches: false,
-			Message: fmt.Sprintf("Expected type int, int8, int16, int32 or int64, but got %T", value),
+			Message: fmt.Sprintf("Expected type int, int8, int16, int32 or int64, but got %T", actualValue),
 		}
 	}
 
-	if a.Min != nil && intValue < *a.Min {
+	if a.min != nil && actualValueInt < *a.min {
 		return MatchResult{
 			Matches: false,
-			Message: fmt.Sprintf("Expected int >= %d, but got %d", *a.Min, intValue),
+			Message: fmt.Sprintf("Expected int >= %d, but got %d", *a.min, actualValueInt),
 		}
 	}
 
-	if a.Max != nil && intValue > *a.Max {
+	if a.max != nil && actualValueInt > *a.max {
 		return MatchResult{
 			Matches: false,
-			Message: fmt.Sprintf("Expected int <= %d, but got %d", *a.Max, intValue),
+			Message: fmt.Sprintf("Expected int <= %d, but got %d", *a.max, actualValueInt),
 		}
 	}
 
