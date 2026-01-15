@@ -141,7 +141,7 @@ func (a *AnyMapMatcher) matching(value any) *AnyMapMatcher {
 		value := mapValue.MapIndex(key)
 		keyValues = append(keyValues, []any{key.Interface(), value.Interface()})
 	}
-	newMatcher := a.WithLength(mapValue.Len()).containing(true, keyValues)
+	newMatcher := a.WithMinLength(mapValue.Len()).containing(false, keyValues)
 	return newMatcher
 }
 

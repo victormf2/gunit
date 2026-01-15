@@ -51,7 +51,7 @@ func (g *GeneralMatcher) Match(actualValueInterface any) MatchResult {
 		g.expectedValue = g.expectedValue.Elem()
 	}
 
-	if actualValue.Kind() != g.expectedValue.Kind() {
+	if !compatibleKinds(actualValue, g.expectedValue) {
 		return MatchResult{
 			Matches: false,
 			Message: fmt.Sprintf("Type mismatch: expected %s, got %s", g.expectedValue.Kind(), actualValue.Kind()),
@@ -79,6 +79,19 @@ func isNil(value reflect.Value) bool {
 		if value.IsNil() {
 			return true
 		}
+	}
+	return false
+}
+
+func compatibleKinds(actualValue reflect.Value, expectedValue reflect.Value) bool {
+	if actualValue.Kind() == expectedValue.Kind() {
+		return true
+	}
+	if actualValue.Kind() == reflect.Array && expectedValue.Kind() == reflect.Slice {
+		return true
+	}
+	if actualValue.Kind() == reflect.Slice && expectedValue.Kind() == reflect.Array {
+		return true
 	}
 	return false
 }

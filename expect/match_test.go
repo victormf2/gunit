@@ -5,23 +5,8 @@ import (
 	"time"
 
 	"github.com/victormf2/gunit/expect"
+	"github.com/victormf2/gunit/internal"
 )
-
-type BigStruct struct {
-	String      string `gunit:"required"`
-	Number      int
-	Bool        bool
-	Date        time.Time
-	SimpleSlice []string
-	NestedSlice []NestedStruct
-	SimpleMap   map[string]int
-	NestedMap   map[string]NestedStruct
-	Struct      NestedStruct
-}
-type NestedStruct struct {
-	ID    int
-	Value string
-}
 
 func TestMatch(t *testing.T) {
 	t.Run("matches nil", func(t *testing.T) {
@@ -60,13 +45,13 @@ func TestMatch(t *testing.T) {
 		expect.It(actual).ToMatch(t, expected)
 	})
 	t.Run("matches identical structs", func(t *testing.T) {
-		actual := BigStruct{
+		actual := internal.BigStruct{
 			String:      "test",
 			Number:      42,
 			Bool:        true,
 			Date:        time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
 			SimpleSlice: []string{"a", "b", "c"},
-			NestedSlice: []NestedStruct{
+			NestedSlice: []internal.NestedStruct{
 				{ID: 1, Value: "one"},
 				{ID: 2, Value: "two"},
 			},
@@ -74,19 +59,19 @@ func TestMatch(t *testing.T) {
 				"one": 1,
 				"two": 2,
 			},
-			NestedMap: map[string]NestedStruct{
+			NestedMap: map[string]internal.NestedStruct{
 				"first":  {ID: 1, Value: "one"},
 				"second": {ID: 2, Value: "two"},
 			},
-			Struct: NestedStruct{ID: 99, Value: "ninety-nine"},
+			Struct: internal.NestedStruct{ID: 99, Value: "ninety-nine"},
 		}
-		expected := &BigStruct{
+		expected := &internal.BigStruct{
 			String:      "test",
 			Number:      42,
 			Bool:        true,
 			Date:        time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
 			SimpleSlice: []string{"a", "b", "c"},
-			NestedSlice: []NestedStruct{
+			NestedSlice: []internal.NestedStruct{
 				{ID: 1, Value: "one"},
 				{ID: 2, Value: "two"},
 			},
@@ -94,23 +79,23 @@ func TestMatch(t *testing.T) {
 				"one": 1,
 				"two": 2,
 			},
-			NestedMap: map[string]NestedStruct{
+			NestedMap: map[string]internal.NestedStruct{
 				"first":  {ID: 1, Value: "one"},
 				"second": {ID: 2, Value: "two"},
 			},
-			Struct: NestedStruct{ID: 99, Value: "ninety-nine"},
+			Struct: internal.NestedStruct{ID: 99, Value: "ninety-nine"},
 		}
 
 		expect.It(actual).ToMatch(t, expected)
 	})
 	t.Run("partial match of structs", func(t *testing.T) {
-		actual := BigStruct{
+		actual := internal.BigStruct{
 			String:      "test",
 			Number:      42,
 			Bool:        true,
 			Date:        time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
 			SimpleSlice: []string{"a", "b", "c"},
-			NestedSlice: []NestedStruct{
+			NestedSlice: []internal.NestedStruct{
 				{ID: 1, Value: "one"},
 				{ID: 2, Value: "two"},
 			},
@@ -118,16 +103,16 @@ func TestMatch(t *testing.T) {
 				"one": 1,
 				"two": 2,
 			},
-			NestedMap: map[string]NestedStruct{
+			NestedMap: map[string]internal.NestedStruct{
 				"first":  {ID: 1, Value: "one"},
 				"second": {ID: 2, Value: "two"},
 			},
-			Struct: NestedStruct{ID: 99, Value: "ninety-nine"},
+			Struct: internal.NestedStruct{ID: 99, Value: "ninety-nine"},
 		}
-		expected := &BigStruct{
+		expected := &internal.BigStruct{
 			String: "test",
 			Date:   time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
-			NestedSlice: []NestedStruct{
+			NestedSlice: []internal.NestedStruct{
 				{ID: 1},
 				{Value: "two"},
 			},
@@ -135,19 +120,19 @@ func TestMatch(t *testing.T) {
 				"one": 1,
 				"two": 2,
 			},
-			NestedMap: map[string]NestedStruct{
+			NestedMap: map[string]internal.NestedStruct{
 				"first":  {ID: 1},
 				"second": {Value: "two"},
 			},
-			Struct: NestedStruct{ID: 99},
+			Struct: internal.NestedStruct{ID: 99},
 		}
 
 		expect.It(actual).ToMatch(t, expected)
 	})
 
 	t.Run("required tag", func(t *testing.T) {
-		actual := BigStruct{}
-		expected := &BigStruct{
+		actual := internal.BigStruct{}
+		expected := &internal.BigStruct{
 			String: "must be set",
 		}
 		expect.It(actual).ToMatch(t, expected)

@@ -177,7 +177,7 @@ func getSliceElementMatcher(value any) Matcher {
 
 func (a *AnySliceMatcher) matchElementInSlice(sliceValue reflect.Value, elementIndex int, elementMatcher Matcher) MatchResult {
 	if a.matchInOrder {
-		element := sliceValue.Index(elementIndex)
+		element := sliceValue.Index(elementIndex).Interface()
 		matchResult := elementMatcher.Match(element)
 		return matchResult
 	}

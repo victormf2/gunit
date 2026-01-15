@@ -13,6 +13,7 @@
   [ ] add WhenCalledWith
 [ ] add temporary mock implementations (once, times, etc)
 [ ] mock generator
+[ ] context mock
 [ ] assertions
   [ ] lengths
   [ ] contains
