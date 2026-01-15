@@ -6,30 +6,38 @@ import (
 	"strings"
 )
 
-type AnyStructMatcher struct {
-	matchingValue reflect.Value
+type StructMatcher interface {
+	Matcher
 }
 
-func (a *AnyStructMatcher) clone() *AnyStructMatcher {
-	newMatcher := &AnyStructMatcher{
-		matchingValue: a.matchingValue,
+func NewStructMatcher() StructMatcher {
+	return &structMatcher{}
+}
+
+type structMatcher struct {
+	expectedValue reflect.Value
+}
+
+func (a *structMatcher) clone() *structMatcher {
+	newMatcher := &structMatcher{
+		expectedValue: a.expectedValue,
 	}
 
 	return newMatcher
 }
 
-func (a *AnyStructMatcher) matching(value any) *AnyStructMatcher {
+func (a *structMatcher) matching(value any) StructMatcher {
 	matchingValue, ok := getStructValue(value)
 	if !ok {
 		panic("Like only accepts structs")
 	}
 
 	newMatcher := a.clone()
-	newMatcher.matchingValue = matchingValue
+	newMatcher.expectedValue = matchingValue
 	return newMatcher
 }
 
-func (a *AnyStructMatcher) Match(value any) MatchResult {
+func (a *structMatcher) Match(value any) MatchResult {
 	structValue, ok := getStructValue(value)
 	if !ok {
 		return MatchResult{
@@ -40,15 +48,15 @@ func (a *AnyStructMatcher) Match(value any) MatchResult {
 
 	problemsByFieldName := map[string]string{}
 	// Compare field by field
-	for i := range a.matchingValue.NumField() {
-		expectedField := a.matchingValue.Type().Field(i)
+	for i := range a.expectedValue.NumField() {
+		expectedField := a.expectedValue.Type().Field(i)
 
 		// Skip private (unexported) fields
 		if !expectedField.IsExported() {
 			continue
 		}
 
-		expectedFieldValue := a.matchingValue.Field(i)
+		expectedFieldValue := a.expectedValue.Field(i)
 
 		gunitTag := expectedField.Tag.Get("gunit")
 
@@ -63,8 +71,7 @@ func (a *AnyStructMatcher) Match(value any) MatchResult {
 			problemsByFieldName[fieldName] = "Field not found in actual value"
 			continue
 		}
-		fieldMatchResult := (&GeneralMatcher{}).
-			Matching(expectedFieldValue.Interface()).
+		fieldMatchResult := NewGeneralMatcher(expectedFieldValue.Interface()).
 			Match(actualFieldValue.Interface())
 		if !fieldMatchResult.Matches {
 			problemsByFieldName[fieldName] = fieldMatchResult.Message

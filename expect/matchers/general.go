@@ -5,26 +5,23 @@ import (
 	"reflect"
 )
 
-type GeneralMatcher struct {
+type GeneralMatcher interface {
+	Matcher
+}
+
+func NewGeneralMatcher(expected any) GeneralMatcher {
+	return &generalMatcher{
+		expected:      expected,
+		expectedValue: reflect.ValueOf(expected),
+	}
+}
+
+type generalMatcher struct {
 	expected      any
 	expectedValue reflect.Value
 }
 
-func (g *GeneralMatcher) clone() *GeneralMatcher {
-	newMatcher := &GeneralMatcher{
-		expectedValue: g.expectedValue,
-	}
-	return newMatcher
-}
-
-func (g *GeneralMatcher) Matching(expected any) *GeneralMatcher {
-	newMatcher := g.clone()
-	newMatcher.expected = expected
-	newMatcher.expectedValue = reflect.ValueOf(expected)
-	return newMatcher
-}
-
-func (g *GeneralMatcher) Match(actualValueInterface any) MatchResult {
+func (g *generalMatcher) Match(actualValueInterface any) MatchResult {
 	actualValue := reflect.ValueOf(actualValueInterface)
 	// Handle nil pointers
 	if isNil(actualValue) {
@@ -60,13 +57,13 @@ func (g *GeneralMatcher) Match(actualValueInterface any) MatchResult {
 
 	switch actualValue.Kind() {
 	case reflect.Struct:
-		return (&AnyStructMatcher{}).matching(g.expected).Match(actualValueInterface)
+		return (&structMatcher{}).matching(g.expected).Match(actualValueInterface)
 	case reflect.Map:
-		return (&AnyMapMatcher{}).matching(g.expected).Match(actualValueInterface)
+		return (&mapMatcher{}).matching(g.expected).Match(actualValueInterface)
 	case reflect.Array, reflect.Slice:
-		return (&AnySliceMatcher{}).matching(g.expected).Match(actualValueInterface)
+		return (&sliceMatcher{}).matching(g.expected).Match(actualValueInterface)
 	default:
-		return (&EqualMatcher{Expected: g.expected}).Match(actualValueInterface)
+		return (&equalMatcher{expected: g.expected}).Match(actualValueInterface)
 	}
 }
 

@@ -5,7 +5,21 @@ import (
 	"reflect"
 )
 
-type AnySliceMatcher struct {
+type SliceMatcher interface {
+	Matcher
+	WithLength(length int) SliceMatcher
+	WithMaxLength(max int) SliceMatcher
+	WithMinLength(min int) SliceMatcher
+	WithLengthBetween(min int, max int) SliceMatcher
+	Containing(values ...any) SliceMatcher
+	ContainingAll(values ...any) SliceMatcher
+}
+
+func NewSliceMatcher() SliceMatcher {
+	return &sliceMatcher{}
+}
+
+type sliceMatcher struct {
 	minLength        *int
 	maxLength        *int
 	matchNil         bool
@@ -14,8 +28,8 @@ type AnySliceMatcher struct {
 	expectedElements []Matcher
 }
 
-func (a *AnySliceMatcher) clone() *AnySliceMatcher {
-	newMatcher := &AnySliceMatcher{
+func (a *sliceMatcher) clone() *sliceMatcher {
+	newMatcher := &sliceMatcher{
 		minLength:        a.minLength,
 		maxLength:        a.maxLength,
 		matchInOrder:     a.matchInOrder,
@@ -27,43 +41,43 @@ func (a *AnySliceMatcher) clone() *AnySliceMatcher {
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) WithLength(length int) *AnySliceMatcher {
+func (a *sliceMatcher) WithLength(length int) SliceMatcher {
 	newMatcher := a.clone()
 	newMatcher.minLength = &length
 	newMatcher.maxLength = &length
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) WithMaxLength(max int) *AnySliceMatcher {
+func (a *sliceMatcher) WithMaxLength(max int) SliceMatcher {
 	newMatcher := a.clone()
 	newMatcher.maxLength = &max
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) WithMinLength(min int) *AnySliceMatcher {
+func (a *sliceMatcher) WithMinLength(min int) SliceMatcher {
 	newMatcher := a.clone()
 	newMatcher.minLength = &min
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) WithLengthBetween(min int, max int) *AnySliceMatcher {
+func (a *sliceMatcher) WithLengthBetween(min int, max int) SliceMatcher {
 	newMatcher := a.clone()
 	newMatcher.minLength = &min
 	newMatcher.maxLength = &max
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) Containing(values ...any) *AnySliceMatcher {
+func (a *sliceMatcher) Containing(values ...any) SliceMatcher {
 	newMatcher := a.containing(false, false, values)
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) ContainingAll(values ...any) *AnySliceMatcher {
+func (a *sliceMatcher) ContainingAll(values ...any) SliceMatcher {
 	newMatcher := a.containing(true, false, values)
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) matching(value any) *AnySliceMatcher {
+func (a *sliceMatcher) matching(value any) SliceMatcher {
 	if value == nil {
 		newMatcher := a.clone()
 		newMatcher.matchNil = true
@@ -77,11 +91,11 @@ func (a *AnySliceMatcher) matching(value any) *AnySliceMatcher {
 	for i := range sliceValue.Len() {
 		elements[i] = sliceValue.Index(i).Interface()
 	}
-	newMatcher := a.WithLength(sliceValue.Len()).containing(true, true, elements)
+	newMatcher := a.WithLength(sliceValue.Len()).(*sliceMatcher).containing(true, true, elements)
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) containing(matchAll bool, matchInOrder bool, expectedElements []any) *AnySliceMatcher {
+func (a *sliceMatcher) containing(matchAll bool, matchInOrder bool, expectedElements []any) *sliceMatcher {
 	elementMatchers := []Matcher{}
 	for _, element := range expectedElements {
 		matcher := getSliceElementMatcher(element)
@@ -95,7 +109,7 @@ func (a *AnySliceMatcher) containing(matchAll bool, matchInOrder bool, expectedE
 	return newMatcher
 }
 
-func (a *AnySliceMatcher) Match(value any) MatchResult {
+func (a *sliceMatcher) Match(value any) MatchResult {
 	if value == nil {
 		if a.matchNil {
 			return MatchResult{Matches: true}
@@ -171,11 +185,11 @@ func getSliceElementMatcher(value any) Matcher {
 	case Matcher:
 		return v
 	default:
-		return (&GeneralMatcher{}).Matching(value)
+		return NewGeneralMatcher(value)
 	}
 }
 
-func (a *AnySliceMatcher) matchElementInSlice(sliceValue reflect.Value, elementIndex int, elementMatcher Matcher) MatchResult {
+func (a *sliceMatcher) matchElementInSlice(sliceValue reflect.Value, elementIndex int, elementMatcher Matcher) MatchResult {
 	if a.matchInOrder {
 		element := sliceValue.Index(elementIndex).Interface()
 		matchResult := elementMatcher.Match(element)

@@ -1,10 +1,14 @@
-package matchers
+package matchers_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/victormf2/gunit/expect/matchers"
+)
 
 func TestAnyOf(t *testing.T) {
 	t.Run("matches correct type", func(t *testing.T) {
-		matcher := &AnyOfMatcher[int]{}
+		matcher := matchers.NewAnyOfMatcher[int]()
 		result := matcher.Match(42)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -16,7 +20,7 @@ func TestAnyOf(t *testing.T) {
 	})
 
 	t.Run("does not match incorrect type", func(t *testing.T) {
-		matcher := &AnyOfMatcher[string]{}
+		matcher := matchers.NewAnyOfMatcher[string]()
 		result := matcher.Match(42)
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")

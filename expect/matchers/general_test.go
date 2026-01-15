@@ -1,9 +1,10 @@
-package matchers
+package matchers_test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/victormf2/gunit/expect/matchers"
 	"github.com/victormf2/gunit/internal"
 )
 
@@ -126,7 +127,7 @@ func TestGeneralMatcher(t *testing.T) {
 		}
 		for _, tC := range testCases {
 			t.Run(tC.desc, func(t *testing.T) {
-				matcher := (&GeneralMatcher{}).Matching(tC.expectedValue)
+				matcher := matchers.NewGeneralMatcher(tC.expectedValue)
 				matchResult := matcher.Match(tC.actualValue)
 				if matchResult.Matches != tC.matches {
 					t.Errorf("Expected matches to be %v but got %v", tC.matches, matchResult.Matches)
@@ -206,14 +207,14 @@ func TestGeneralMatcher(t *testing.T) {
 				actualValue: []any{1, 2},
 				expectedValue: []any{
 					1,
-					(&AnyIntMatcher{}).GreaterThan(1),
+					matchers.NewIntMatcher().GreaterThan(1),
 				},
 				matches: true,
 			},
 		}
 		for _, tC := range testCases {
 			t.Run(tC.desc, func(t *testing.T) {
-				matcher := (&GeneralMatcher{}).Matching(tC.expectedValue)
+				matcher := matchers.NewGeneralMatcher(tC.expectedValue)
 				matchResult := matcher.Match(tC.actualValue)
 				if matchResult.Matches != tC.matches {
 					t.Errorf("Expected matches to be %v but got %v", tC.matches, matchResult.Matches)
@@ -262,13 +263,13 @@ func TestGeneralMatcher(t *testing.T) {
 			{
 				desc:          "matches maps with custom value matchers",
 				actualValue:   map[any]any{"a": 1},
-				expectedValue: map[any]any{"a": (&AnyIntMatcher{}).GreaterThan(0)},
+				expectedValue: map[any]any{"a": matchers.NewIntMatcher().GreaterThan(0)},
 				matches:       true,
 			},
 			{
 				desc:          "matches maps with custom key matchers",
 				actualValue:   map[any]any{"a": 1},
-				expectedValue: map[any]any{(&AnyStringMatcher{}).Containing("a"): 1},
+				expectedValue: map[any]any{matchers.NewStringMatcher().Containing("a"): 1},
 				matches:       true,
 			},
 			{
@@ -280,7 +281,7 @@ func TestGeneralMatcher(t *testing.T) {
 		}
 		for _, tC := range testCases {
 			t.Run(tC.desc, func(t *testing.T) {
-				matcher := (&GeneralMatcher{}).Matching(tC.expectedValue)
+				matcher := matchers.NewGeneralMatcher(tC.expectedValue)
 				matchResult := matcher.Match(tC.actualValue)
 				if matchResult.Matches != tC.matches {
 					t.Errorf("Expected matches to be %v but got %v", tC.matches, matchResult.Matches)
@@ -394,7 +395,7 @@ func TestGeneralMatcher(t *testing.T) {
 		}
 		for _, tC := range testCases {
 			t.Run(tC.desc, func(t *testing.T) {
-				matcher := (&GeneralMatcher{}).Matching(tC.expectedValue)
+				matcher := matchers.NewGeneralMatcher(tC.expectedValue)
 				matchResult := matcher.Match(tC.actualValue)
 				if matchResult.Matches != tC.matches {
 					t.Errorf("Expected matches to be %v but got %v", tC.matches, matchResult.Matches)

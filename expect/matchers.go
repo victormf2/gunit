@@ -6,46 +6,50 @@ import (
 
 type Matcher = matchers.Matcher
 
-func Any() Matcher {
-	return &matchers.AnyMatcher{}
+func Any() matchers.AnyMatcher {
+	return matchers.NewAnyMatcher()
 }
 
-func AnyOf[T any]() Matcher {
-	return &matchers.AnyOfMatcher[T]{}
+func AnyOf[T any]() matchers.AnyOfMatcher[T] {
+	return matchers.NewAnyOfMatcher[T]()
 }
 
-func AnyInt() Matcher {
-	return &matchers.AnyIntMatcher{}
-}
-
-func AnyUint() Matcher {
-	return &matchers.AnyUintMatcher{}
-}
-
-func AnyFloat() Matcher {
-	return &matchers.AnyFloatMatcher{}
-}
-
-func AnyString() Matcher {
-	return &matchers.AnyStringMatcher{}
-}
-
-func AnyBool() Matcher {
-	return &matchers.AnyBoolMatcher{}
-}
-
-func AnySlice() Matcher {
-	return &matchers.AnySliceMatcher{}
-}
-
-func AnyMap() Matcher {
-	return &matchers.AnyMapMatcher{}
+func Bool() matchers.BoolMatcher {
+	return matchers.NewBoolMatcher()
 }
 
 func Equal(expected any) Matcher {
-	return &matchers.EqualMatcher{Expected: expected}
+	return matchers.NewEqualMatcher(expected)
+}
+
+func Float() matchers.FloatMatcher {
+	return matchers.NewFloatMatcher()
+}
+
+func Int() matchers.IntMatcher {
+	return matchers.NewIntMatcher()
+}
+
+func Map() matchers.MapMatcher {
+	return matchers.NewMapMatcher()
 }
 
 func Matching(expected any) Matcher {
-	return (&matchers.GeneralMatcher{}).Matching(expected)
+	return matchers.NewGeneralMatcher(expected)
+}
+
+func Slice() matchers.SliceMatcher {
+	return matchers.NewSliceMatcher()
+}
+
+func String() matchers.StringMatcher {
+	return matchers.NewStringMatcher()
+}
+
+func Struct() matchers.StructMatcher {
+	return matchers.NewStructMatcher()
+}
+
+func Uint() matchers.UintMatcher {
+	return matchers.NewUintMatcher()
 }

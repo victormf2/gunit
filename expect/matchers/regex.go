@@ -5,11 +5,19 @@ import (
 	"regexp"
 )
 
-type RegexMatcher struct {
-	Regex *regexp.Regexp
+type RegexMatcher interface {
+	Matcher
 }
 
-func (r *RegexMatcher) Match(value any) MatchResult {
+func NewRegexMatcher(regex *regexp.Regexp) RegexMatcher {
+	return &regexMatcher{regex: regex}
+}
+
+type regexMatcher struct {
+	regex *regexp.Regexp
+}
+
+func (r *regexMatcher) Match(value any) MatchResult {
 	strValue, ok := value.(string)
 	if !ok {
 		return MatchResult{
@@ -18,10 +26,10 @@ func (r *RegexMatcher) Match(value any) MatchResult {
 		}
 	}
 
-	if !r.Regex.MatchString(strValue) {
+	if !r.regex.MatchString(strValue) {
 		return MatchResult{
 			Matches: false,
-			Message: fmt.Sprintf("Expected string to match regex '%s', but it did not", r.Regex),
+			Message: fmt.Sprintf("Expected string to match regex '%s', but it did not", r.regex),
 		}
 	}
 

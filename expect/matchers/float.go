@@ -2,15 +2,28 @@ package matchers
 
 import "fmt"
 
-type AnyFloatMatcher struct {
+type FloatMatcher interface {
+	Matcher
+	LessThan(value float64) FloatMatcher
+	LessThanOrEqualTo(value float64) FloatMatcher
+	GreaterThan(value float64) FloatMatcher
+	GreaterThanOrEqualTo(value float64) FloatMatcher
+	CloseTo(expectedValue float64, tolerance float64) FloatMatcher
+}
+
+func NewFloatMatcher() FloatMatcher {
+	return &floatMatcher{}
+}
+
+type floatMatcher struct {
 	min           *float64
 	max           *float64
 	expectedValue *float64
 	tolerance     *float64
 }
 
-func (a *AnyFloatMatcher) clone() *AnyFloatMatcher {
-	newMatcher := &AnyFloatMatcher{
+func (a *floatMatcher) clone() *floatMatcher {
+	newMatcher := &floatMatcher{
 		min:           a.min,
 		max:           a.max,
 		expectedValue: a.expectedValue,
@@ -19,41 +32,41 @@ func (a *AnyFloatMatcher) clone() *AnyFloatMatcher {
 	return newMatcher
 }
 
-func (a *AnyFloatMatcher) LessThan(value float64) *AnyFloatMatcher {
+func (a *floatMatcher) LessThan(value float64) FloatMatcher {
 	newMatcher := a.clone()
 	max := value - 1
 	newMatcher.max = &max
 	return newMatcher
 }
 
-func (a *AnyFloatMatcher) LessThanOrEqualTo(value float64) *AnyFloatMatcher {
+func (a *floatMatcher) LessThanOrEqualTo(value float64) FloatMatcher {
 	newMatcher := a.clone()
 	newMatcher.max = new(float64)
 	*newMatcher.max = value
 	return newMatcher
 }
 
-func (a *AnyFloatMatcher) GreaterThan(value float64) *AnyFloatMatcher {
+func (a *floatMatcher) GreaterThan(value float64) FloatMatcher {
 	newMatcher := a.clone()
 	min := value + 1
 	newMatcher.min = &min
 	return newMatcher
 }
 
-func (a *AnyFloatMatcher) GreaterThanOrEqualTo(value float64) *AnyFloatMatcher {
+func (a *floatMatcher) GreaterThanOrEqualTo(value float64) FloatMatcher {
 	newMatcher := a.clone()
 	newMatcher.min = &value
 	return newMatcher
 }
 
-func (a *AnyFloatMatcher) CloseTo(expectedValue float64, tolerance float64) *AnyFloatMatcher {
+func (a *floatMatcher) CloseTo(expectedValue float64, tolerance float64) FloatMatcher {
 	newMatcher := a.clone()
 	newMatcher.expectedValue = &expectedValue
 	newMatcher.tolerance = &tolerance
 	return newMatcher
 }
 
-func (a *AnyFloatMatcher) Match(actualValue any) MatchResult {
+func (a *floatMatcher) Match(actualValue any) MatchResult {
 	actualValueFloat, ok := getFloat(actualValue)
 	if !ok {
 		return MatchResult{

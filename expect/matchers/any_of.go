@@ -2,9 +2,17 @@ package matchers
 
 import "fmt"
 
-type AnyOfMatcher[T any] struct{}
+type AnyOfMatcher[T any] interface {
+	Matcher
+}
 
-func (a *AnyOfMatcher[T]) Match(value any) MatchResult {
+func NewAnyOfMatcher[T any]() AnyOfMatcher[T] {
+	return &anyOfMatcher[T]{}
+}
+
+type anyOfMatcher[T any] struct{}
+
+func (a *anyOfMatcher[T]) Match(value any) MatchResult {
 	_, ok := value.(T)
 	if ok {
 		return MatchResult{Matches: true}

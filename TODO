@@ -5,10 +5,10 @@
     [x] RegexMatcher
     [x] change Containing to Matching
     [x] add ContainingAll
-    [ ] struct or general matcher
+    [x] struct or general matcher
     [ ] time.Time matcher
     [ ] change AnyMap Containing to receive a map[any]any
-    [ ] review tests and public interface
+    [x] review tests and public interface
   [ ] add matchers to ToHaveBeenCalled
   [ ] add WhenCalledWith
 [ ] add temporary mock implementations (once, times, etc)

@@ -1,8 +1,12 @@
-package matchers
+package matchers_test
 
-import "testing"
+import (
+	"testing"
 
-func TestAnyIntMatcher(t *testing.T) {
+	"github.com/victormf2/gunit/expect/matchers"
+)
+
+func TestIntMatcher(t *testing.T) {
 	testCases := []struct {
 		desc    string
 		value   any
@@ -41,7 +45,7 @@ func TestAnyIntMatcher(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			matcher := &AnyIntMatcher{}
+			matcher := matchers.NewIntMatcher()
 			result := matcher.Match(tC.value)
 			if result.Matches != tC.matches {
 				t.Errorf("Expected matches to be %v, but got %v", tC.matches, result.Matches)
@@ -50,7 +54,7 @@ func TestAnyIntMatcher(t *testing.T) {
 	}
 
 	t.Run("LessThan", func(t *testing.T) {
-		matcher := (&AnyIntMatcher{}).LessThan(10)
+		matcher := matchers.NewIntMatcher().LessThan(10)
 		result := matcher.Match(9)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -62,7 +66,7 @@ func TestAnyIntMatcher(t *testing.T) {
 	})
 
 	t.Run("LessThanOrEqualTo", func(t *testing.T) {
-		matcher := (&AnyIntMatcher{}).LessThanOrEqualTo(10)
+		matcher := matchers.NewIntMatcher().LessThanOrEqualTo(10)
 		result := matcher.Match(9)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -78,7 +82,7 @@ func TestAnyIntMatcher(t *testing.T) {
 	})
 
 	t.Run("GreaterThan", func(t *testing.T) {
-		matcher := (&AnyIntMatcher{}).GreaterThan(5)
+		matcher := matchers.NewIntMatcher().GreaterThan(5)
 		result := matcher.Match(6)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -90,7 +94,7 @@ func TestAnyIntMatcher(t *testing.T) {
 	})
 
 	t.Run("GreaterThanOrEqualTo", func(t *testing.T) {
-		matcher := (&AnyIntMatcher{}).GreaterThanOrEqualTo(5)
+		matcher := matchers.NewIntMatcher().GreaterThanOrEqualTo(5)
 		result := matcher.Match(6)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")

@@ -1,8 +1,12 @@
-package matchers
+package matchers_test
 
-import "testing"
+import (
+	"testing"
 
-func TestAnyMap(t *testing.T) {
+	"github.com/victormf2/gunit/expect/matchers"
+)
+
+func TestMapMatcher(t *testing.T) {
 	testCases := []struct {
 		desc    string
 		value   any
@@ -21,7 +25,7 @@ func TestAnyMap(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			matcher := &AnyMapMatcher{}
+			matcher := matchers.NewMapMatcher()
 			result := matcher.Match(tC.value)
 			if result.Matches != tC.matches {
 				t.Errorf("Expected matches to be %v, but got %v", tC.matches, result.Matches)
@@ -30,7 +34,7 @@ func TestAnyMap(t *testing.T) {
 	}
 
 	t.Run("WithLength", func(t *testing.T) {
-		matcher := (&AnyMapMatcher{}).WithLength(2)
+		matcher := matchers.NewMapMatcher().WithLength(2)
 		result := matcher.Match(map[string]int{"a": 1, "b": 2})
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -46,7 +50,7 @@ func TestAnyMap(t *testing.T) {
 	})
 
 	t.Run("WithMaxLength", func(t *testing.T) {
-		matcher := (&AnyMapMatcher{}).WithMaxLength(2)
+		matcher := matchers.NewMapMatcher().WithMaxLength(2)
 		result := matcher.Match(map[string]int{"a": 1})
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
@@ -61,7 +65,7 @@ func TestAnyMap(t *testing.T) {
 		}
 	})
 	t.Run("WithMinLength", func(t *testing.T) {
-		matcher := (&AnyMapMatcher{}).WithMinLength(2)
+		matcher := matchers.NewMapMatcher().WithMinLength(2)
 		result := matcher.Match(map[string]int{"a": 1})
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
@@ -76,7 +80,7 @@ func TestAnyMap(t *testing.T) {
 		}
 	})
 	t.Run("WithLengthBetween", func(t *testing.T) {
-		matcher := (&AnyMapMatcher{}).WithLengthBetween(2, 4)
+		matcher := matchers.NewMapMatcher().WithLengthBetween(2, 4)
 		result := matcher.Match(map[string]int{"a": 1})
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
@@ -100,11 +104,11 @@ func TestAnyMap(t *testing.T) {
 	})
 
 	t.Run("Containing", func(t *testing.T) {
-		matcher := (&AnyMapMatcher{}).Containing(
+		matcher := matchers.NewMapMatcher().Containing(
 			[]any{"a", 1},
 			[]any{"b", 2},
-			[]any{(&AnyStringMatcher{}).Containing("d"), 4},
-			[]any{"e", (&AnyIntMatcher{}).GreaterThan(4)},
+			[]any{matchers.NewStringMatcher().Containing("d"), 4},
+			[]any{"e", matchers.NewIntMatcher().GreaterThan(4)},
 		)
 		result := matcher.Match(map[string]int{"a": 1, "b": 2, "c": 3})
 		if !result.Matches {
@@ -133,10 +137,10 @@ func TestAnyMap(t *testing.T) {
 	})
 
 	t.Run("ContainingAll", func(t *testing.T) {
-		matcher := (&AnyMapMatcher{}).ContainingAll(
+		matcher := matchers.NewMapMatcher().ContainingAll(
 			[]any{"a", 1},
 			[]any{"b", 2},
-			[]any{(&AnyStringMatcher{}).Containing("c"), (&AnyIntMatcher{}).GreaterThan(2)},
+			[]any{matchers.NewStringMatcher().Containing("c"), matchers.NewIntMatcher().GreaterThan(2)},
 		)
 		result := matcher.Match(map[string]int{"a": 1, "b": 2, "coo": 3})
 		if !result.Matches {
@@ -153,9 +157,9 @@ func TestAnyMap(t *testing.T) {
 	})
 
 	t.Run("ContainingKeys", func(t *testing.T) {
-		matcher := (&AnyMapMatcher{}).ContainingKeys(
+		matcher := matchers.NewMapMatcher().ContainingKeys(
 			"a",
-			(&AnyStringMatcher{}).Containing("b"),
+			matchers.NewStringMatcher().Containing("b"),
 		)
 		result := matcher.Match(map[string]int{"a": 1, "b": 2, "c": 3})
 		if !result.Matches {
@@ -176,9 +180,9 @@ func TestAnyMap(t *testing.T) {
 	})
 
 	t.Run("ContainingAllKeys", func(t *testing.T) {
-		matcher := (&AnyMapMatcher{}).ContainingAllKeys(
+		matcher := matchers.NewMapMatcher().ContainingAllKeys(
 			"a",
-			(&AnyStringMatcher{}).Containing("b"),
+			matchers.NewStringMatcher().Containing("b"),
 		)
 		result := matcher.Match(map[string]int{"a": 1, "boo": 2, "c": 3})
 		if !result.Matches {
@@ -199,9 +203,9 @@ func TestAnyMap(t *testing.T) {
 	})
 
 	t.Run("ContainingValues", func(t *testing.T) {
-		matcher := (&AnyMapMatcher{}).ContainingValues(
+		matcher := matchers.NewMapMatcher().ContainingValues(
 			1,
-			(&AnyIntMatcher{}).GreaterThan(2),
+			matchers.NewIntMatcher().GreaterThan(2),
 		)
 		result := matcher.Match(map[string]int{"a": 1, "b": 2, "c": 3})
 		if !result.Matches {
@@ -222,9 +226,9 @@ func TestAnyMap(t *testing.T) {
 	})
 
 	t.Run("ContainingAllValues", func(t *testing.T) {
-		matcher := (&AnyMapMatcher{}).ContainingAllValues(
+		matcher := matchers.NewMapMatcher().ContainingAllValues(
 			1,
-			(&AnyIntMatcher{}).GreaterThan(2),
+			matchers.NewIntMatcher().GreaterThan(2),
 		)
 		result := matcher.Match(map[string]int{"a": 1, "b": 2, "c": 3})
 		if !result.Matches {

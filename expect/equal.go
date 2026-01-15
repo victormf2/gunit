@@ -9,7 +9,7 @@ import (
 func (e *Expector) ToEqual(t *testing.T, expected any) {
 	actual := e.value
 
-	matchResult := (&matchers.EqualMatcher{Expected: expected}).Match(actual)
+	matchResult := matchers.NewEqualMatcher(expected).Match(actual)
 	if !matchResult.Matches {
 		t.Fatal(matchResult.Message)
 	}

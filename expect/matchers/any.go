@@ -1,7 +1,15 @@
 package matchers
 
-type AnyMatcher struct{}
+type AnyMatcher interface {
+	Matcher
+}
 
-func (a *AnyMatcher) Match(value any) MatchResult {
+func NewAnyMatcher() AnyMatcher {
+	return &anyMatcher{}
+}
+
+type anyMatcher struct{}
+
+func (a *anyMatcher) Match(value any) MatchResult {
 	return MatchResult{Matches: true}
 }

@@ -1,6 +1,10 @@
-package matchers
+package matchers_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/victormf2/gunit/expect/matchers"
+)
 
 func TestEqualMatcher(t *testing.T) {
 	testCases := []struct {
@@ -30,7 +34,7 @@ func TestEqualMatcher(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			matcher := &EqualMatcher{Expected: tC.expected}
+			matcher := matchers.NewEqualMatcher(tC.expected)
 			result := matcher.Match(tC.actual)
 			if result.Matches != tC.matches {
 				t.Errorf("Expected match result to be %v, but got %v", tC.matches, result.Matches)

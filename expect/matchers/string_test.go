@@ -1,149 +1,139 @@
-package matchers
+package matchers_test
 
-import "testing"
+import (
+	"regexp"
+	"testing"
 
-func TestAnySlice(t *testing.T) {
+	"github.com/victormf2/gunit/expect/matchers"
+)
+
+func TestStringMatcher(t *testing.T) {
 	testCases := []struct {
 		desc    string
 		value   any
 		matches bool
 	}{
 		{
-			desc:    "matches slice",
-			value:   []int{1, 2, 3},
+			desc:    "matches string",
+			value:   "hello",
 			matches: true,
 		},
 		{
-			desc:    "matches array",
-			value:   [3]int{1, 2, 3},
-			matches: true,
-		},
-		{
-			desc:    "does not match non-slice",
+			desc:    "does not match non-string",
 			value:   42,
 			matches: false,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			matcher := &AnySliceMatcher{}
+			matcher := matchers.NewStringMatcher()
 			result := matcher.Match(tC.value)
 			if result.Matches != tC.matches {
 				t.Errorf("Expected matches to be %v, but got %v", tC.matches, result.Matches)
 			}
 		})
+
 	}
 
 	t.Run("WithLength", func(t *testing.T) {
-		matcher := (&AnySliceMatcher{}).WithLength(3)
-		result := matcher.Match([]int{1, 2, 3})
+		matcher := matchers.NewStringMatcher().WithLength(5)
+		result := matcher.Match("hello")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match([]int{1, 2})
+		result = matcher.Match("hi")
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
-
-		result = matcher.Match([]int{1, 2, 3, 4})
-		if result.Matches {
-			t.Errorf("Expected matches to be false, but got true")
-		}
-	})
-
-	t.Run("WithMinLength", func(t *testing.T) {
-		matcher := (&AnySliceMatcher{}).WithMinLength(2)
-		result := matcher.Match([]int{1, 2, 3})
-		if !result.Matches {
-			t.Errorf("Expected matches to be true, but got false")
-		}
-		result = matcher.Match([]int{1, 2})
-		if !result.Matches {
-			t.Errorf("Expected matches to be true, but got false")
-		}
-		result = matcher.Match([]int{1})
+		result = matcher.Match("helloo")
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
 	})
 
 	t.Run("WithMaxLength", func(t *testing.T) {
-		matcher := (&AnySliceMatcher{}).WithMaxLength(2)
-		result := matcher.Match([]int{1})
+		matcher := matchers.NewStringMatcher().WithMaxLength(5)
+		result := matcher.Match("hi")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match([]int{1, 2})
+		result = matcher.Match("hello")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match([]int{1, 2, 3})
+		result = matcher.Match("helloo")
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
+		}
+	})
+
+	t.Run("WithMinLength", func(t *testing.T) {
+		matcher := matchers.NewStringMatcher().WithMinLength(3)
+		result := matcher.Match("hi")
+		if result.Matches {
+			t.Errorf("Expected matches to be false, but got true")
+		}
+		result = matcher.Match("hey")
+		if !result.Matches {
+			t.Errorf("Expected matches to be true, but got false")
+		}
+		result = matcher.Match("hello")
+		if !result.Matches {
+			t.Errorf("Expected matches to be true, but got false")
 		}
 	})
 
 	t.Run("WithLengthBetween", func(t *testing.T) {
-		matcher := (&AnySliceMatcher{}).WithLengthBetween(2, 4)
-		result := matcher.Match([]int{1})
+		matcher := matchers.NewStringMatcher().WithLengthBetween(3, 5)
+		result := matcher.Match("hi")
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
-		result = matcher.Match([]int{1, 2})
+		result = matcher.Match("hey")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match([]int{1, 2, 3})
+		result = matcher.Match("hell")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match([]int{1, 2, 3, 4})
+		result = matcher.Match("hello")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match([]int{1, 2, 3, 4, 5})
-		if result.Matches {
-			t.Errorf("Expected matches to be false, but got true")
-		}
-	})
-
-	t.Run("Containing", func(t *testing.T) {
-		matcher := (&AnySliceMatcher{}).Containing(
-			&AnyStringMatcher{},
-			42,
-		)
-		result := matcher.Match([]any{"hello", 42, 3.14})
-		if !result.Matches {
-			t.Errorf("Expected matches to be true, but got false")
-		}
-		result = matcher.Match([]any{"hello"})
-		if !result.Matches {
-			t.Errorf("Expected matches to be true, but got false")
-		}
-		result = matcher.Match([]any{42})
-		if !result.Matches {
-			t.Errorf("Expected matches to be true, but got false")
-		}
-		result = matcher.Match([]any{3.14})
+		result = matcher.Match("helloo")
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
 	})
 
-	t.Run("ContainingAll", func(t *testing.T) {
-		matcher := (&AnySliceMatcher{}).ContainingAll(
-			&AnyStringMatcher{},
-			42,
-		)
-		result := matcher.Match([]any{"hello", 42, 3.14})
+	t.Run("Matching", func(t *testing.T) {
+		matcher := matchers.NewStringMatcher().Matching("foo", regexp.MustCompile("ba[^z]"))
+		result := matcher.Match("foo")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match([]any{"hello", 3.14})
+		result = matcher.Match("bar")
+		if !result.Matches {
+			t.Errorf("Expected matches to be true, but got false")
+		}
+		result = matcher.Match("baz")
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
-		result = matcher.Match([]any{42, 3.14})
+	})
+
+	t.Run("MatchingAll", func(t *testing.T) {
+		matcher := matchers.NewStringMatcher().MatchingAll("foo", regexp.MustCompile("ba[^z]"))
+		result := matcher.Match("foobarbaz")
+		if !result.Matches {
+			t.Errorf("Expected matches to be true, but got false")
+		}
+		result = matcher.Match("foo")
+		if result.Matches {
+			t.Errorf("Expected matches to be false, but got true")
+		}
+		result = matcher.Match("bar")
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}

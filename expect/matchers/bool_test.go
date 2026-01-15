@@ -1,8 +1,12 @@
-package matchers
+package matchers_test
 
-import "testing"
+import (
+	"testing"
 
-func TestAnyBoolMatcher(t *testing.T) {
+	"github.com/victormf2/gunit/expect/matchers"
+)
+
+func TestBoolMatcher(t *testing.T) {
 	testCases := []struct {
 		desc    string
 		value   any
@@ -26,7 +30,7 @@ func TestAnyBoolMatcher(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			matcher := &AnyBoolMatcher{}
+			matcher := matchers.NewBoolMatcher()
 			result := matcher.Match(tC.value)
 			if result.Matches != tC.matches {
 				t.Errorf("Expected matches to be %v, but got %v", tC.matches, result.Matches)

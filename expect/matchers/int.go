@@ -2,46 +2,58 @@ package matchers
 
 import "fmt"
 
-type AnyIntMatcher struct {
+type IntMatcher interface {
+	Matcher
+	LessThan(value int) IntMatcher
+	LessThanOrEqualTo(value int) IntMatcher
+	GreaterThan(value int) IntMatcher
+	GreaterThanOrEqualTo(value int) IntMatcher
+}
+
+func NewIntMatcher() IntMatcher {
+	return &intMatcher{}
+}
+
+type intMatcher struct {
 	min *int
 	max *int
 }
 
-func (a *AnyIntMatcher) clone() *AnyIntMatcher {
-	newMatcher := &AnyIntMatcher{
+func (a *intMatcher) clone() *intMatcher {
+	newMatcher := &intMatcher{
 		min: a.min,
 		max: a.max,
 	}
 	return newMatcher
 }
 
-func (a *AnyIntMatcher) LessThan(value int) *AnyIntMatcher {
+func (a *intMatcher) LessThan(value int) IntMatcher {
 	newMatcher := a.clone()
 	max := value - 1
 	newMatcher.max = &max
 	return newMatcher
 }
 
-func (a *AnyIntMatcher) LessThanOrEqualTo(value int) *AnyIntMatcher {
+func (a *intMatcher) LessThanOrEqualTo(value int) IntMatcher {
 	newMatcher := a.clone()
 	newMatcher.max = &value
 	return newMatcher
 }
 
-func (a *AnyIntMatcher) GreaterThan(value int) *AnyIntMatcher {
+func (a *intMatcher) GreaterThan(value int) IntMatcher {
 	newMatcher := a.clone()
 	min := value + 1
 	newMatcher.min = &min
 	return newMatcher
 }
 
-func (a *AnyIntMatcher) GreaterThanOrEqualTo(value int) *AnyIntMatcher {
+func (a *intMatcher) GreaterThanOrEqualTo(value int) IntMatcher {
 	newMatcher := a.clone()
 	newMatcher.min = &value
 	return newMatcher
 }
 
-func (a *AnyIntMatcher) Match(actualValue any) MatchResult {
+func (a *intMatcher) Match(actualValue any) MatchResult {
 	actualValueInt, ok := getInt(actualValue)
 	if !ok {
 		return MatchResult{

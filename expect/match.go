@@ -11,7 +11,7 @@ type MatchResult = matchers.MatchResult
 func (e *Expector) ToMatch(t *testing.T, expected any) {
 	actual := e.value
 
-	matchResult := (&matchers.GeneralMatcher{}).Matching(expected).Match(actual)
+	matchResult := Matching(expected).Match(actual)
 	if !matchResult.Matches {
 		t.Fatal(matchResult.String())
 	}

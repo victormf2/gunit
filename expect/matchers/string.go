@@ -5,84 +5,100 @@ import (
 	"regexp"
 )
 
-type AnyStringMatcher struct {
-	minLength      *int
-	maxLength      *int
-	stringMatchers []Matcher
-	matchAll       bool
+type StringMatcher interface {
+	Matcher
+	WithLength(length int) StringMatcher
+	WithMaxLength(max int) StringMatcher
+	WithMinLength(min int) StringMatcher
+	WithLengthBetween(min int, max int) StringMatcher
+	Matching(values ...any) StringMatcher
+	MatchingAll(values ...any) StringMatcher
+	Containing(values ...any) StringMatcher
+	ContainingAll(values ...any) StringMatcher
 }
 
-func (a *AnyStringMatcher) clone() *AnyStringMatcher {
-	newMatcher := &AnyStringMatcher{
-		minLength:      a.minLength,
-		maxLength:      a.maxLength,
-		stringMatchers: make([]Matcher, len(a.stringMatchers)),
-		matchAll:       a.matchAll,
+func NewStringMatcher() StringMatcher {
+	return &stringMatcher{}
+}
+
+type stringMatcher struct {
+	minLength        *int
+	maxLength        *int
+	expectedPatterns []Matcher
+	matchAll         bool
+}
+
+func (a *stringMatcher) clone() *stringMatcher {
+	newMatcher := &stringMatcher{
+		minLength:        a.minLength,
+		maxLength:        a.maxLength,
+		expectedPatterns: make([]Matcher, len(a.expectedPatterns)),
+		matchAll:         a.matchAll,
 	}
-	copy(newMatcher.stringMatchers, a.stringMatchers)
+	copy(newMatcher.expectedPatterns, a.expectedPatterns)
 	return newMatcher
 }
 
-func (a *AnyStringMatcher) WithLength(length int) *AnyStringMatcher {
+func (a *stringMatcher) WithLength(length int) StringMatcher {
 	newMatcher := a.clone()
 	newMatcher.minLength = &length
 	newMatcher.maxLength = &length
 	return newMatcher
 }
 
-func (a *AnyStringMatcher) WithMaxLength(max int) *AnyStringMatcher {
+func (a *stringMatcher) WithMaxLength(max int) StringMatcher {
 	newMatcher := a.clone()
 	newMatcher.maxLength = &max
 	return newMatcher
 }
 
-func (a *AnyStringMatcher) WithMinLength(min int) *AnyStringMatcher {
+func (a *stringMatcher) WithMinLength(min int) StringMatcher {
 	newMatcher := a.clone()
 	newMatcher.minLength = &min
 	return newMatcher
 }
 
-func (a *AnyStringMatcher) WithLengthBetween(min int, max int) *AnyStringMatcher {
+func (a *stringMatcher) WithLengthBetween(min int, max int) StringMatcher {
 	newMatcher := a.clone()
 	newMatcher.minLength = &min
 	newMatcher.maxLength = &max
 	return newMatcher
 }
 
-func (a *AnyStringMatcher) Matching(values ...any) *AnyStringMatcher {
+func (a *stringMatcher) Matching(values ...any) StringMatcher {
 	return a.matching(false, values...)
 }
 
-func (a *AnyStringMatcher) MatchingAll(values ...any) *AnyStringMatcher {
+func (a *stringMatcher) MatchingAll(values ...any) StringMatcher {
 	return a.matching(true, values...)
 }
 
 // Alias for Matching
-func (a *AnyStringMatcher) Containing(values ...any) *AnyStringMatcher {
+func (a *stringMatcher) Containing(values ...any) StringMatcher {
 	return a.Matching(values...)
 }
 
 // Alias for MatchingAll
-func (a *AnyStringMatcher) ContainingAll(values ...any) *AnyStringMatcher {
+func (a *stringMatcher) ContainingAll(values ...any) StringMatcher {
 	return a.MatchingAll(values...)
 }
 
-func (a *AnyStringMatcher) matching(matchAll bool, values ...any) *AnyStringMatcher {
+func (a *stringMatcher) matching(matchAll bool, values ...any) *stringMatcher {
 	newMatcher := a.clone()
-	stringMatchers := []Matcher{}
+	expectedPatterns := []Matcher{}
 	for _, value := range values {
-		matcher, ok := getStringMatcher(value)
+		matcher, ok := getPatternMatcher(value)
 		if !ok {
 			panic("Containing only accepts strings, *regexp.Regexp, or Matcher instances")
 		}
-		stringMatchers = append(stringMatchers, matcher)
+		expectedPatterns = append(expectedPatterns, matcher)
 	}
-	newMatcher.stringMatchers = stringMatchers
+	newMatcher.expectedPatterns = expectedPatterns
 	newMatcher.matchAll = matchAll
 	return newMatcher
 }
 
-func (a *AnyStringMatcher) Match(value any) MatchResult {
+func (a *stringMatcher) Match(value any) MatchResult {
 	strValue, ok := value.(string)
 	if !ok {
 		return MatchResult{
@@ -103,7 +119,7 @@ func (a *AnyStringMatcher) Match(value any) MatchResult {
 		}
 	}
 	foundMatch := false
-	for _, stringMatcher := range a.stringMatchers {
+	for _, stringMatcher := range a.expectedPatterns {
 		matchResult := stringMatcher.Match(strValue)
 		if matchResult.Matches {
 			foundMatch = true
@@ -119,7 +135,7 @@ func (a *AnyStringMatcher) Match(value any) MatchResult {
 			}
 		}
 	}
-	if !foundMatch && len(a.stringMatchers) > 0 {
+	if !foundMatch && len(a.expectedPatterns) > 0 {
 		return MatchResult{
 			Matches: false,
 			Message: fmt.Sprintf("None of the substring matchers matched the string"),
@@ -128,12 +144,12 @@ func (a *AnyStringMatcher) Match(value any) MatchResult {
 	return MatchResult{Matches: true}
 }
 
-func getStringMatcher(value any) (Matcher, bool) {
+func getPatternMatcher(value any) (Matcher, bool) {
 	switch v := value.(type) {
 	case string:
-		return &SubstringMatcher{Substring: v}, true
+		return NewSubstringMatcher(v), true
 	case *regexp.Regexp:
-		return &RegexMatcher{Regex: v}, true
+		return NewRegexMatcher(v), true
 	case Matcher:
 		return v, true
 	default:

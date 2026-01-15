@@ -4,7 +4,7 @@ import "testing"
 
 func TestAnyMatcher(t *testing.T) {
 	t.Run("matches any value", func(t *testing.T) {
-		matcher := &AnyMatcher{}
+		matcher := NewAnyMatcher()
 		values := []any{
 			42,
 			"hello",

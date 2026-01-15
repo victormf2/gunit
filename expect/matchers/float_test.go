@@ -1,47 +1,36 @@
-package matchers
+package matchers_test
 
-import "testing"
+import (
+	"testing"
 
-func TestAnyUintMatcher(t *testing.T) {
+	"github.com/victormf2/gunit/expect/matchers"
+)
+
+func TestFloatMatcher(t *testing.T) {
 	testCases := []struct {
 		desc    string
 		value   any
 		matches bool
 	}{
 		{
-			desc:    "matches uint",
-			value:   uint(42),
+			desc:    "matches float32",
+			value:   float32(3.14),
 			matches: true,
 		},
 		{
-			desc:    "matches uint8",
-			value:   uint8(42),
+			desc:    "matches float64",
+			value:   float64(2.718),
 			matches: true,
 		},
 		{
-			desc:    "matches uint16",
-			value:   uint16(42),
-			matches: true,
-		},
-		{
-			desc:    "matches uint32",
-			value:   uint32(42),
-			matches: true,
-		},
-		{
-			desc:    "matches uint64",
-			value:   uint64(42),
-			matches: true,
-		},
-		{
-			desc:    "does not match non-uint",
-			value:   12,
+			desc:    "does not match non-float",
+			value:   42,
 			matches: false,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			matcher := &AnyUintMatcher{}
+			matcher := matchers.NewFloatMatcher()
 			result := matcher.Match(tC.value)
 			if result.Matches != tC.matches {
 				t.Errorf("Expected matches to be %v, but got %v", tC.matches, result.Matches)
@@ -50,54 +39,70 @@ func TestAnyUintMatcher(t *testing.T) {
 	}
 
 	t.Run("LessThan", func(t *testing.T) {
-		matcher := (&AnyUintMatcher{}).LessThan(uint(10))
-		result := matcher.Match(uint(9))
+		matcher := matchers.NewFloatMatcher().LessThan(10.0)
+		result := matcher.Match(9.0)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match(uint(10))
+		result = matcher.Match(10.0)
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
 	})
 
 	t.Run("LessThanOrEqualTo", func(t *testing.T) {
-		matcher := (&AnyUintMatcher{}).LessThanOrEqualTo(uint(10))
-		result := matcher.Match(uint(9))
+		matcher := matchers.NewFloatMatcher().LessThanOrEqualTo(10.0)
+		result := matcher.Match(9.0)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match(uint(10))
+		result = matcher.Match(10.0)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match(uint(11))
+		result = matcher.Match(11.0)
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
 	})
 
 	t.Run("GreaterThan", func(t *testing.T) {
-		matcher := (&AnyUintMatcher{}).GreaterThan(uint(5))
-		result := matcher.Match(uint(6))
+		matcher := matchers.NewFloatMatcher().GreaterThan(5.0)
+		result := matcher.Match(6.0)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match(uint(5))
+		result = matcher.Match(5.0)
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
 	})
 
 	t.Run("GreaterThanOrEqualTo", func(t *testing.T) {
-		matcher := (&AnyUintMatcher{}).GreaterThanOrEqualTo(uint(5))
-		result := matcher.Match(uint(6))
+		matcher := matchers.NewFloatMatcher().GreaterThanOrEqualTo(5.0)
+		result := matcher.Match(6.0)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match(uint(5))
+		result = matcher.Match(5.0)
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
+		}
+		result = matcher.Match(4.0)
+		if result.Matches {
+			t.Errorf("Expected matches to be false, but got true")
+		}
+	})
+
+	t.Run("CloseTo", func(t *testing.T) {
+		matcher := matchers.NewFloatMatcher().CloseTo(10.0, 0.5)
+		result := matcher.Match(10.3)
+		if !result.Matches {
+			t.Errorf("Expected matches to be true, but got false")
+		}
+		result = matcher.Match(10.6)
+		if result.Matches {
+			t.Errorf("Expected matches to be false, but got true")
 		}
 	})
 }
