@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/victormf2/gunit/example/domain"
+	"github.com/victormf2/gunit/internal/example/domain"
 )
 
 type Repository interface {

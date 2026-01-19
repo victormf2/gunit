@@ -1,14 +1,15 @@
 package expect
 
 import (
-	"testing"
-
 	"github.com/victormf2/gunit/expect/matchers"
+	"github.com/victormf2/gunit/gunit"
 )
 
 type MatchResult = matchers.MatchResult
 
-func (e *Expector) ToMatch(t *testing.T, expected any) {
+func (e *expector) ToMatch(t gunit.TestingT, expected any) {
+	t.Helper()
+
 	actual := e.value
 
 	matchResult := Matching(expected).Match(actual)

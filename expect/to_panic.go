@@ -6,7 +6,9 @@ import (
 	"github.com/victormf2/gunit/gunit"
 )
 
-func (e *Expector) ToPanic(t gunit.TestingT) {
+func (e *expector) ToPanic(t gunit.TestingT) {
+	t.Helper()
+
 	functionValue := reflect.ValueOf(e.value)
 	if functionValue.Kind() != reflect.Func {
 		t.Fatalf("ToPanic expects a function, but got %s", functionValue.Kind())

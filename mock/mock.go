@@ -17,19 +17,22 @@ type MockFunction struct {
 	mu                    sync.RWMutex
 	defaultImplementation reflect.Value
 	calls                 []Call
+	name                  string
 }
 
 // NewMockFunction creates a new mock function wrapper
-func NewMockFunction(fn any) *MockFunction {
-	fnValue := reflect.ValueOf(fn)
-	if fnValue.Kind() != reflect.Func {
-		panic("provided value is not a function")
-	}
+func NewMockFunction(name string, fn any) *MockFunction {
+	fnValue := getFunction(fn)
 
 	return &MockFunction{
+		name:                  name,
 		defaultImplementation: fnValue,
 		calls:                 []Call{},
 	}
+}
+
+func (m *MockFunction) Name() string {
+	return m.name
 }
 
 // Call invokes the mock function with the provided arguments
@@ -69,8 +72,21 @@ func (m *MockFunction) Calls() []Call {
 	return slices.Clone(m.calls)
 }
 
-func (m *MockFunction) Reset() {
+func (m *MockFunction) ResetCalls() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.calls = []Call{}
+}
+
+func (m *MockFunction) SetDefaultImplementation(fn any) {
+	fnValue := getFunction(fn)
+	m.defaultImplementation = fnValue
+}
+
+func getFunction(value any) reflect.Value {
+	fnValue := reflect.ValueOf(value)
+	if fnValue.Kind() != reflect.Func {
+		panic("provided value is not a function")
+	}
+	return fnValue
 }

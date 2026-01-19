@@ -18,6 +18,10 @@ func Bool() matchers.BoolMatcher {
 	return matchers.NewBoolMatcher()
 }
 
+func Call() matchers.CallMatcher {
+	return matchers.NewCallMatcher()
+}
+
 func Equal(expected any) Matcher {
 	return matchers.NewEqualMatcher(expected)
 }
