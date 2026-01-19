@@ -1,37 +1,37 @@
-package expect_test
+package expectors_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/victormf2/gunit/expect"
+	"github.com/victormf2/gunit/expect/expectors"
 	"github.com/victormf2/gunit/internal"
 )
 
 func TestMatch(t *testing.T) {
 	t.Run("matches nil", func(t *testing.T) {
-		expect.It(nil).ToMatch(t, nil)
+		expectors.NewExpector(nil).ToMatch(t, nil)
 	})
 	t.Run("matches nil different types", func(t *testing.T) {
 		actual := (*string)(nil)
 		expected := (*int)(nil)
-		expect.It(actual).ToMatch(t, expected)
+		expectors.NewExpector(actual).ToMatch(t, expected)
 	})
 	t.Run("matches scalars", func(t *testing.T) {
-		expect.It(42).ToMatch(t, 42)
-		expect.It(0).ToMatch(t, 0)
-		expect.It(3.14).ToMatch(t, 3.14)
-		expect.It(0.0).ToMatch(t, 0.0)
-		expect.It("hello").ToMatch(t, "hello")
-		expect.It("").ToMatch(t, "")
-		expect.It(false).ToMatch(t, false)
-		expect.It(true).ToMatch(t, true)
-		expect.It(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)).ToMatch(t, time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC))
+		expectors.NewExpector(42).ToMatch(t, 42)
+		expectors.NewExpector(0).ToMatch(t, 0)
+		expectors.NewExpector(3.14).ToMatch(t, 3.14)
+		expectors.NewExpector(0.0).ToMatch(t, 0.0)
+		expectors.NewExpector("hello").ToMatch(t, "hello")
+		expectors.NewExpector("").ToMatch(t, "")
+		expectors.NewExpector(false).ToMatch(t, false)
+		expectors.NewExpector(true).ToMatch(t, true)
+		expectors.NewExpector(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)).ToMatch(t, time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC))
 	})
 	t.Run("matches slices", func(t *testing.T) {
 		actual := []int{1, 2, 3, 4, 5}
 		expected := []int{1, 2, 3, 4, 5}
-		expect.It(actual).ToMatch(t, expected)
+		expectors.NewExpector(actual).ToMatch(t, expected)
 	})
 	t.Run("matches maps", func(t *testing.T) {
 		actual := map[string]int{
@@ -42,7 +42,7 @@ func TestMatch(t *testing.T) {
 			"one": 1,
 			"two": 2,
 		}
-		expect.It(actual).ToMatch(t, expected)
+		expectors.NewExpector(actual).ToMatch(t, expected)
 	})
 	t.Run("matches identical structs", func(t *testing.T) {
 		actual := internal.BigStruct{
@@ -86,7 +86,7 @@ func TestMatch(t *testing.T) {
 			Struct: internal.NestedStruct{ID: 99, Value: "ninety-nine"},
 		}
 
-		expect.It(actual).ToMatch(t, expected)
+		expectors.NewExpector(actual).ToMatch(t, expected)
 	})
 	t.Run("partial match of structs", func(t *testing.T) {
 		actual := internal.BigStruct{
@@ -127,7 +127,7 @@ func TestMatch(t *testing.T) {
 			Struct: internal.NestedStruct{ID: 99},
 		}
 
-		expect.It(actual).ToMatch(t, expected)
+		expectors.NewExpector(actual).ToMatch(t, expected)
 	})
 
 	t.Run("required tag", func(t *testing.T) {
@@ -135,6 +135,6 @@ func TestMatch(t *testing.T) {
 		expected := &internal.BigStruct{
 			String: "must be set",
 		}
-		expect.It(actual).ToMatch(t, expected)
+		expectors.NewExpector(actual).ToMatch(t, expected)
 	})
 }

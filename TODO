@@ -9,10 +9,11 @@
     [ ] time.Time matcher
     [ ] change AnyMap Containing to receive a map[any]any
     [x] review tests and public interface
-  [ ] add matchers to ToHaveBeenCalled
+  [x] add matchers to ToHaveBeenCalled
+[ ] mock functions
   [ ] add WhenCalledWith
-[ ] add temporary mock implementations (once, times, etc)
-[ ] mock generator
+  [ ] add temporary mock implementations (once, times, etc)
+  [ ] mock generator
 [ ] context mock
 [ ] assertions
   [ ] lengths
@@ -25,4 +26,6 @@
     [ ] is sorted
     [ ] equals ignore order (array containing)
 [ ] Fix messages
+  [ ] instead of setting fields, use a Rules like interface so their names can be specified
+      example expect.Int().GreaterThan(1).Match(0) => Expected value to be greater than 1, got 0
 [ ] Docs

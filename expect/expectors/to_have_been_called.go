@@ -1,4 +1,4 @@
-package expect
+package expectors
 
 import (
 	"strings"

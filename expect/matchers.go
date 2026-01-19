@@ -22,7 +22,7 @@ func Call() matchers.CallMatcher {
 	return matchers.NewCallMatcher()
 }
 
-func Equal(expected any) Matcher {
+func Equal(expected any) matchers.EqualMatcher {
 	return matchers.NewEqualMatcher(expected)
 }
 
@@ -38,7 +38,7 @@ func Map() matchers.MapMatcher {
 	return matchers.NewMapMatcher()
 }
 
-func Matching(expected any) Matcher {
+func Matching(expected any) matchers.GeneralMatcher {
 	return matchers.NewGeneralMatcher(expected)
 }
 

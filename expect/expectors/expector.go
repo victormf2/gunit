@@ -1,4 +1,4 @@
-package expect
+package expectors
 
 import (
 	"github.com/victormf2/gunit/expect/matchers"
@@ -12,7 +12,7 @@ type Expector interface {
 	ToPanic(t gunit.TestingT)
 }
 
-func It(value any) Expector {
+func NewExpector(value any) Expector {
 	return &expector{
 		value: value,
 	}
