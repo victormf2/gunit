@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/victormf2/gunit/expect/expectors"
 	"github.com/victormf2/gunit/internal"
+	"github.com/victormf2/gunit/internal/expectors"
 )
 
 func TestMatch(t *testing.T) {

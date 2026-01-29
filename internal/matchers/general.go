@@ -1,6 +1,7 @@
 package matchers
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 )
@@ -37,6 +38,14 @@ func (g *generalMatcher) Match(actualValueInterface any) MatchResult {
 		return MatchResult{
 			Matches: false,
 			Message: fmt.Sprintf("Expected nil, but got %v", actualValue.Interface()),
+		}
+	}
+
+	actualCtx, ok := actualValueInterface.(context.Context)
+	if ok {
+		expectedCtx, ok := g.expected.(context.Context)
+		if ok {
+			return NewContextMatcher(expectedCtx).Match(actualCtx)
 		}
 	}
 

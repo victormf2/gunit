@@ -3,8 +3,8 @@ package expectors_test
 import (
 	"testing"
 
-	"github.com/victormf2/gunit/expect/expectors"
 	"github.com/victormf2/gunit/internal"
+	"github.com/victormf2/gunit/internal/expectors"
 )
 
 func TestToPanic(t *testing.T) {

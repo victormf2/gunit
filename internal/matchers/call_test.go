@@ -3,7 +3,7 @@ package matchers_test
 import (
 	"testing"
 
-	"github.com/victormf2/gunit/expect/matchers"
+	"github.com/victormf2/gunit/internal/matchers"
 	"github.com/victormf2/gunit/mock"
 )
 

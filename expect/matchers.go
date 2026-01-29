@@ -1,7 +1,7 @@
 package expect
 
 import (
-	"github.com/victormf2/gunit/expect/matchers"
+	"github.com/victormf2/gunit/internal/matchers"
 )
 
 type Matcher = matchers.Matcher

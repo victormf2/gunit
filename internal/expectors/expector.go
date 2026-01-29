@@ -1,8 +1,8 @@
 package expectors
 
 import (
-	"github.com/victormf2/gunit/expect/matchers"
 	"github.com/victormf2/gunit/gunit"
+	"github.com/victormf2/gunit/internal/matchers"
 )
 
 type Expector interface {

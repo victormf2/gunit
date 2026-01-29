@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/victormf2/gunit/expect/matchers"
 	"github.com/victormf2/gunit/internal"
+	"github.com/victormf2/gunit/internal/matchers"
 )
 
 func TestGeneralMatcher(t *testing.T) {

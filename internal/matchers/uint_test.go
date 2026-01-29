@@ -3,49 +3,49 @@ package matchers_test
 import (
 	"testing"
 
-	"github.com/victormf2/gunit/expect/matchers"
+	"github.com/victormf2/gunit/internal/matchers"
 )
 
-func TestIntMatcher(t *testing.T) {
+func TestUintMatcher(t *testing.T) {
 	testCases := []struct {
 		desc    string
 		value   any
 		matches bool
 	}{
 		{
-			desc:    "matches int",
-			value:   42,
+			desc:    "matches uint",
+			value:   uint(42),
 			matches: true,
 		},
 		{
-			desc:    "matches int8",
-			value:   int8(42),
+			desc:    "matches uint8",
+			value:   uint8(42),
 			matches: true,
 		},
 		{
-			desc:    "matches int16",
-			value:   int16(42),
+			desc:    "matches uint16",
+			value:   uint16(42),
 			matches: true,
 		},
 		{
-			desc:    "matches int32",
-			value:   int32(42),
+			desc:    "matches uint32",
+			value:   uint32(42),
 			matches: true,
 		},
 		{
-			desc:    "matches int64",
-			value:   int64(42),
+			desc:    "matches uint64",
+			value:   uint64(42),
 			matches: true,
 		},
 		{
-			desc:    "does not match non-int",
-			value:   12.34,
+			desc:    "does not match non-uint",
+			value:   12,
 			matches: false,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			matcher := matchers.NewIntMatcher()
+			matcher := matchers.NewUintMatcher()
 			result := matcher.Match(tC.value)
 			if result.Matches != tC.matches {
 				t.Errorf("Expected matches to be %v, but got %v", tC.matches, result.Matches)
@@ -54,52 +54,52 @@ func TestIntMatcher(t *testing.T) {
 	}
 
 	t.Run("LessThan", func(t *testing.T) {
-		matcher := matchers.NewIntMatcher().LessThan(10)
-		result := matcher.Match(9)
+		matcher := matchers.NewUintMatcher().LessThan(uint(10))
+		result := matcher.Match(uint(9))
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match(10)
+		result = matcher.Match(uint(10))
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
 	})
 
 	t.Run("LessThanOrEqualTo", func(t *testing.T) {
-		matcher := matchers.NewIntMatcher().LessThanOrEqualTo(10)
-		result := matcher.Match(9)
+		matcher := matchers.NewUintMatcher().LessThanOrEqualTo(uint(10))
+		result := matcher.Match(uint(9))
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match(10)
+		result = matcher.Match(uint(10))
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match(11)
+		result = matcher.Match(uint(11))
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
 	})
 
 	t.Run("GreaterThan", func(t *testing.T) {
-		matcher := matchers.NewIntMatcher().GreaterThan(5)
-		result := matcher.Match(6)
+		matcher := matchers.NewUintMatcher().GreaterThan(uint(5))
+		result := matcher.Match(uint(6))
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match(5)
+		result = matcher.Match(uint(5))
 		if result.Matches {
 			t.Errorf("Expected matches to be false, but got true")
 		}
 	})
 
 	t.Run("GreaterThanOrEqualTo", func(t *testing.T) {
-		matcher := matchers.NewIntMatcher().GreaterThanOrEqualTo(5)
-		result := matcher.Match(6)
+		matcher := matchers.NewUintMatcher().GreaterThanOrEqualTo(uint(5))
+		result := matcher.Match(uint(6))
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
-		result = matcher.Match(5)
+		result = matcher.Match(uint(5))
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")
 		}
