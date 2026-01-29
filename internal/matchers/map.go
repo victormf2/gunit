@@ -11,11 +11,11 @@ type MapMatcher interface {
 	WithMaxLength(max int) MapMatcher
 	WithMinLength(min int) MapMatcher
 	WithLengthBetween(min int, max int) MapMatcher
-	Containing(keyValues ...[]any) MapMatcher
+	ContainingAny(keyValues ...[]any) MapMatcher
 	ContainingAll(keyValues ...[]any) MapMatcher
-	ContainingKeys(keys ...any) MapMatcher
+	ContainingAnyKeys(keys ...any) MapMatcher
 	ContainingAllKeys(keys ...any) MapMatcher
-	ContainingValues(values ...any) MapMatcher
+	ContainingAnyValues(values ...any) MapMatcher
 	ContainingAllValues(values ...any) MapMatcher
 }
 
@@ -69,7 +69,7 @@ func (a *mapMatcher) WithLengthBetween(min int, max int) MapMatcher {
 	return newMatcher
 }
 
-func (a *mapMatcher) Containing(keyValues ...[]any) MapMatcher {
+func (a *mapMatcher) ContainingAny(keyValues ...[]any) MapMatcher {
 	newMatcher := a.containing(false, keyValues)
 	return newMatcher
 }
@@ -79,7 +79,7 @@ func (a *mapMatcher) ContainingAll(keyValues ...[]any) MapMatcher {
 	return newMatcher
 }
 
-func (a *mapMatcher) ContainingKeys(keys ...any) MapMatcher {
+func (a *mapMatcher) ContainingAnyKeys(keys ...any) MapMatcher {
 	keyValues := [][]any{}
 	for _, key := range keys {
 		keyValues = append(keyValues, []any{key, NewAnyMatcher()})
@@ -99,7 +99,7 @@ func (a *mapMatcher) ContainingAllKeys(keys ...any) MapMatcher {
 	return newMatcher
 }
 
-func (a *mapMatcher) ContainingValues(values ...any) MapMatcher {
+func (a *mapMatcher) ContainingAnyValues(values ...any) MapMatcher {
 	keyValues := [][]any{}
 	for _, value := range values {
 		keyValues = append(keyValues, []any{NewAnyMatcher(), value})

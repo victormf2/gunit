@@ -11,9 +11,9 @@ type StringMatcher interface {
 	WithMaxLength(max int) StringMatcher
 	WithMinLength(min int) StringMatcher
 	WithLengthBetween(min int, max int) StringMatcher
-	Matching(values ...any) StringMatcher
+	MatchingAny(values ...any) StringMatcher
 	MatchingAll(values ...any) StringMatcher
-	Containing(values ...any) StringMatcher
+	ContainingAny(values ...any) StringMatcher
 	ContainingAll(values ...any) StringMatcher
 }
 
@@ -65,7 +65,7 @@ func (a *stringMatcher) WithLengthBetween(min int, max int) StringMatcher {
 	return newMatcher
 }
 
-func (a *stringMatcher) Matching(values ...any) StringMatcher {
+func (a *stringMatcher) MatchingAny(values ...any) StringMatcher {
 	return a.matching(false, values...)
 }
 
@@ -74,8 +74,8 @@ func (a *stringMatcher) MatchingAll(values ...any) StringMatcher {
 }
 
 // Alias for Matching
-func (a *stringMatcher) Containing(values ...any) StringMatcher {
-	return a.Matching(values...)
+func (a *stringMatcher) ContainingAny(values ...any) StringMatcher {
+	return a.MatchingAny(values...)
 }
 
 // Alias for MatchingAll

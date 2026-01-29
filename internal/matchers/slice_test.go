@@ -111,8 +111,8 @@ func TestSliceMatcher(t *testing.T) {
 		}
 	})
 
-	t.Run("Containing", func(t *testing.T) {
-		matcher := matchers.NewSliceMatcher().Containing(
+	t.Run("ContainingAny", func(t *testing.T) {
+		matcher := matchers.NewSliceMatcher().ContainingAny(
 			matchers.NewStringMatcher(),
 			42,
 		)

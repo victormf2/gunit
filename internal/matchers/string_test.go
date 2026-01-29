@@ -107,8 +107,8 @@ func TestStringMatcher(t *testing.T) {
 		}
 	})
 
-	t.Run("Matching", func(t *testing.T) {
-		matcher := matchers.NewStringMatcher().Matching("foo", regexp.MustCompile("ba[^z]"))
+	t.Run("MatchingAny", func(t *testing.T) {
+		matcher := matchers.NewStringMatcher().MatchingAny("foo", regexp.MustCompile("ba[^z]"))
 		result := matcher.Match("foo")
 		if !result.Matches {
 			t.Errorf("Expected matches to be true, but got false")

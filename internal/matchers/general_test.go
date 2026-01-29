@@ -269,7 +269,7 @@ func TestGeneralMatcher(t *testing.T) {
 			{
 				desc:          "matches maps with custom key matchers",
 				actualValue:   map[any]any{"a": 1},
-				expectedValue: map[any]any{matchers.NewStringMatcher().Containing("a"): 1},
+				expectedValue: map[any]any{matchers.NewStringMatcher().ContainingAny("a"): 1},
 				matches:       true,
 			},
 			{

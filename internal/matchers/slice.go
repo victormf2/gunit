@@ -11,7 +11,7 @@ type SliceMatcher interface {
 	WithMaxLength(max int) SliceMatcher
 	WithMinLength(min int) SliceMatcher
 	WithLengthBetween(min int, max int) SliceMatcher
-	Containing(values ...any) SliceMatcher
+	ContainingAny(values ...any) SliceMatcher
 	ContainingAll(values ...any) SliceMatcher
 }
 
@@ -67,7 +67,7 @@ func (a *sliceMatcher) WithLengthBetween(min int, max int) SliceMatcher {
 	return newMatcher
 }
 
-func (a *sliceMatcher) Containing(values ...any) SliceMatcher {
+func (a *sliceMatcher) ContainingAny(values ...any) SliceMatcher {
 	newMatcher := a.containing(false, false, values)
 	return newMatcher
 }

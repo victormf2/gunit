@@ -103,11 +103,11 @@ func TestMapMatcher(t *testing.T) {
 		}
 	})
 
-	t.Run("Containing", func(t *testing.T) {
-		matcher := matchers.NewMapMatcher().Containing(
+	t.Run("ContainingAny", func(t *testing.T) {
+		matcher := matchers.NewMapMatcher().ContainingAny(
 			[]any{"a", 1},
 			[]any{"b", 2},
-			[]any{matchers.NewStringMatcher().Containing("d"), 4},
+			[]any{matchers.NewStringMatcher().ContainingAny("d"), 4},
 			[]any{"e", matchers.NewIntMatcher().GreaterThan(4)},
 		)
 		result := matcher.Match(map[string]int{"a": 1, "b": 2, "c": 3})
@@ -140,7 +140,7 @@ func TestMapMatcher(t *testing.T) {
 		matcher := matchers.NewMapMatcher().ContainingAll(
 			[]any{"a", 1},
 			[]any{"b", 2},
-			[]any{matchers.NewStringMatcher().Containing("c"), matchers.NewIntMatcher().GreaterThan(2)},
+			[]any{matchers.NewStringMatcher().ContainingAny("c"), matchers.NewIntMatcher().GreaterThan(2)},
 		)
 		result := matcher.Match(map[string]int{"a": 1, "b": 2, "coo": 3})
 		if !result.Matches {
@@ -157,9 +157,9 @@ func TestMapMatcher(t *testing.T) {
 	})
 
 	t.Run("ContainingKeys", func(t *testing.T) {
-		matcher := matchers.NewMapMatcher().ContainingKeys(
+		matcher := matchers.NewMapMatcher().ContainingAnyKeys(
 			"a",
-			matchers.NewStringMatcher().Containing("b"),
+			matchers.NewStringMatcher().ContainingAny("b"),
 		)
 		result := matcher.Match(map[string]int{"a": 1, "b": 2, "c": 3})
 		if !result.Matches {
@@ -182,7 +182,7 @@ func TestMapMatcher(t *testing.T) {
 	t.Run("ContainingAllKeys", func(t *testing.T) {
 		matcher := matchers.NewMapMatcher().ContainingAllKeys(
 			"a",
-			matchers.NewStringMatcher().Containing("b"),
+			matchers.NewStringMatcher().ContainingAny("b"),
 		)
 		result := matcher.Match(map[string]int{"a": 1, "boo": 2, "c": 3})
 		if !result.Matches {
@@ -203,7 +203,7 @@ func TestMapMatcher(t *testing.T) {
 	})
 
 	t.Run("ContainingValues", func(t *testing.T) {
-		matcher := matchers.NewMapMatcher().ContainingValues(
+		matcher := matchers.NewMapMatcher().ContainingAnyValues(
 			1,
 			matchers.NewIntMatcher().GreaterThan(2),
 		)
