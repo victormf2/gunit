@@ -1,59 +1,57 @@
 package expect
 
 import (
-	"github.com/victormf2/gunit/internal/matchers"
+	"github.com/victormf2/gunit/internal/expect/matchers"
 )
 
-type Matcher = matchers.Matcher
-
-func Any() matchers.AnyMatcher {
+func Any() AnyMatcher {
 	return matchers.NewAnyMatcher()
 }
 
-func AnyOf[T any]() matchers.AnyOfMatcher[T] {
+func AnyOf[T any]() AnyOfMatcher[T] {
 	return matchers.NewAnyOfMatcher[T]()
 }
 
-func Bool() matchers.BoolMatcher {
+func Bool() BoolMatcher {
 	return matchers.NewBoolMatcher()
 }
 
-func Call() matchers.CallMatcher {
+func Call() CallMatcher {
 	return matchers.NewCallMatcher()
 }
 
-func Equal(expected any) matchers.EqualMatcher {
+func Equal(expected any) EqualMatcher {
 	return matchers.NewEqualMatcher(expected)
 }
 
-func Float() matchers.FloatMatcher {
+func Float() FloatMatcher {
 	return matchers.NewFloatMatcher()
 }
 
-func Int() matchers.IntMatcher {
+func Int() IntMatcher {
 	return matchers.NewIntMatcher()
 }
 
-func Map() matchers.MapMatcher {
+func Map() MapMatcher {
 	return matchers.NewMapMatcher()
 }
 
-func Matching(expected any) matchers.GeneralMatcher {
+func Matching(expected any) GeneralMatcher {
 	return matchers.NewGeneralMatcher(expected)
 }
 
-func Slice() matchers.SliceMatcher {
+func Slice() SliceMatcher {
 	return matchers.NewSliceMatcher()
 }
 
-func String() matchers.StringMatcher {
+func String() StringMatcher {
 	return matchers.NewStringMatcher()
 }
 
-func Struct() matchers.StructMatcher {
+func Struct() StructMatcher {
 	return matchers.NewStructMatcher()
 }
 
-func Uint() matchers.UintMatcher {
+func Uint() UintMatcher {
 	return matchers.NewUintMatcher()
 }

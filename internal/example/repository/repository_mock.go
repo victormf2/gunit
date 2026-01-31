@@ -3,15 +3,15 @@ package repository
 import (
 	"context"
 
-	"github.com/victormf2/gunit/gunit"
+	"github.com/victormf2/gunit"
 	"github.com/victormf2/gunit/internal/example/domain"
 	"github.com/victormf2/gunit/mock"
 )
 
 type MockRepository struct {
-	MockGetUser             *mock.MockFunction
-	MockSaveUser            *mock.MockFunction
-	MockSomethingReturnsInt *mock.MockFunction
+	MockGetUser             mock.MockFunction
+	MockSaveUser            mock.MockFunction
+	MockSomethingReturnsInt mock.MockFunction
 }
 
 func NewMockRepository() *MockRepository {
@@ -49,9 +49,9 @@ func (m *MockRepository) SomethingReturnsInt() int {
 }
 
 func (m *MockRepository) SpyOn(v Repository) {
-	m.MockGetUser.SetDefaultImplementation(v.GetUser)
-	m.MockSaveUser.SetDefaultImplementation(v.SaveUser)
-	m.MockSomethingReturnsInt.SetDefaultImplementation(v.SomethingReturnsInt)
+	m.MockGetUser.Always(v.GetUser)
+	m.MockSaveUser.Always(v.SaveUser)
+	m.MockSomethingReturnsInt.Always(v.SomethingReturnsInt)
 }
 
 var _ Repository = &MockRepository{}

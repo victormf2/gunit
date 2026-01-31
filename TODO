@@ -11,10 +11,10 @@
     [x] review tests and public interface
   [x] add matchers to ToHaveBeenCalled
 [ ] mock functions
-  [ ] add WhenCalledWith
+  [ ] add On
   [ ] add temporary mock implementations (once, times, etc)
   [ ] mock generator
-[ ] context mock
+[x] context mock
 [ ] assertions
   [ ] lengths
   [ ] contains
